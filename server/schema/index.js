@@ -2,6 +2,7 @@
 
 const { gql } = require('apollo-server');
 const { makeExecutableSchema } = require('@graphql-tools/schema');
+const scalarSchema = require('./scalar');
 
 const baseTypeDefs = gql`
   type Query {
@@ -25,8 +26,9 @@ const baseTypeDefs = gql`
 
 module.exports = function createSchema() {
   return makeExecutableSchema({
-    typeDefs: [baseTypeDefs],
+    typeDefs: [baseTypeDefs, scalarSchema.typeDefs],
     resolvers: {
+      ...scalarSchema.resolvers,
       Query: {},
       Mutation: {},
     },
