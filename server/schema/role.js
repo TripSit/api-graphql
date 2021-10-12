@@ -3,6 +3,10 @@
 const { gql } = require('apollo-server');
 
 exports.typeDefs = gql`
+  extend type Query {
+    roles: [Role!]!
+  }
+
   extend type Mutation {
     createRole($input: CreateRoleInput!): Role!
   }
@@ -21,6 +25,12 @@ exports.typeDefs = gql`
 `;
 
 exports.resolvers = {
+  Query: {
+    async roles(root, params, { dataSources }) {
+      return dataSources.knex('roles').select('*');
+    },
+  },
+
   Mutation: {
     async createRole(root, { input }, { dataSources }) {
       return dataSources.knex('roles')
@@ -35,7 +45,7 @@ exports.resolvers = {
       return dataSources.knex('users')
         .innerJoin('userRoles', 'userRoles.userId', 'users.id')
         .where('userRoles.roleId', role.id)
-        .select('*');
+        .select('users.*', 'userRoles.createdAt');
     },
   },
 };

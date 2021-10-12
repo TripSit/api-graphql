@@ -15,7 +15,7 @@ exports.typeDefs = gql`
   }
 
   extend type Mutation {
-    createUser($nick: String!, $password: String!): User!
+    createUser($nick: String!, $password: String!, $email: String): User!
   }
 
   type User {
@@ -41,18 +41,16 @@ exports.resolvers = {
       const { passwordHash, ...user } = await dataSources.knex('users')
         .where('nick', nick)
         .first();
-      if (!(await argon.verify(passwordHash, password))) {
-        throw new AuthenticationError('Authentication failed');
-      }
+      if (!(await argon.verify(passwordHash, password))) throw new AuthenticationError();
       return user;
     },
   },
 
   Mutation: {
-    async createUser(root, { nick, password }, { dataSources }) {
+    async createUser(root, { password, ...input }, { dataSources }) {
       return dataSources.knex('users').insert({
-        nick,
-        password: await argon.hash(password),
+        ...input,
+        passwordHash: await argon.hash(password),
       });
     },
   },
