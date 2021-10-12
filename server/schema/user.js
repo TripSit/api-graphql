@@ -16,6 +16,7 @@ exports.typeDefs = gql`
 
   extend type Mutation {
     createUser($nick: String!, $password: String!, $email: String): User!
+    updateUser($id: UUID!, $input: UpdateUserInput!): User!
   }
 
   type User {
@@ -52,6 +53,11 @@ exports.resolvers = {
         ...input,
         passwordHash: await argon.hash(password),
       });
+    },
+
+    async updateUser(root, { id, input }, { dataSources }) {
+      await dataSources.knex('users').update(input).where('id', id);
+      return dataSources.knex('users').where('id', id).first();
     },
   },
 
