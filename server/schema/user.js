@@ -1,11 +1,12 @@
 'use strict';
 
-const { gql } = require('apollo-server');
+const { gql, AuthenticationError } = require('apollo-server');
 const argon = require('argon2');
 
 exports.typeDefs = gql`
   extend type Query {
     user($input: UserSearchInput!): [User!]!
+    authenticate($nick: String!, $password: String!): User!
   }
 
   input UserSearchInput {
@@ -20,6 +21,9 @@ exports.typeDefs = gql`
   type User {
     id: ID!
     nick: String!
+    email: EmailAddress
+    discordAccounts: [DiscordAccount!]!
+    roles: [Role!]!
     createdAt: DateTime!
   }
 `;
@@ -27,10 +31,20 @@ exports.typeDefs = gql`
 exports.resolvers = {
   Query: {
     async user(root, { input }, { dataSources }) {
-      const dbQuery = dataSources.knex('users').select('id', 'nick', 'createdAt');
+      const dbQuery = dataSources.knex('users').select('id', 'nick', 'email', 'createdAt');
       if (input.id) dbQuery.where('id', input.id);
       if (input.nick) dbQuery.where('nick', input.nick);
       return dbQuery;
+    },
+
+    async authenticate(root, { nick, password }, { dataSources }) {
+      const { passwordHash, ...user } = await dataSources.knex('users')
+        .where('nick', nick)
+        .first();
+      if (!(await argon.verify(passwordHash, password))) {
+        throw new AuthenticationError('Authentication failed');
+      }
+      return user;
     },
   },
 
@@ -40,6 +54,22 @@ exports.resolvers = {
         nick,
         password: await argon.hash(password),
       });
+    },
+  },
+
+  User: {
+    async discordAccounts(user, params, { dataSources }) {
+      return dataSources.knex('discordAccounts')
+        .select('id', 'createdAt')
+        .innerJoin('users', 'users.id', 'discordAccounts.userId')
+        .where('users.id', user.id);
+    },
+
+    async roles(user, params, { dataSources }) {
+      return dataSources.knex('roles')
+        .innerJoin('userRoles', 'userRoles.roleId', 'roles.id')
+        .where('userRoles.userId', user.id)
+        .select('roles.*');
     },
   },
 };

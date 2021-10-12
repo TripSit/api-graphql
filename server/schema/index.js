@@ -3,6 +3,8 @@
 const { gql } = require('apollo-server');
 const { makeExecutableSchema } = require('@graphql-tools/schema');
 const scalarSchema = require('./scalar');
+const userSchema = require('./user');
+const discordAccountSchema = require('./discord-account');
 
 const baseTypeDefs = gql`
   type Query {
@@ -26,11 +28,24 @@ const baseTypeDefs = gql`
 
 module.exports = function createSchema() {
   return makeExecutableSchema({
-    typeDefs: [baseTypeDefs, scalarSchema.typeDefs],
+    typeDefs: [
+      baseTypeDefs,
+      scalarSchema.typeDefs,
+      userSchema.typeDefs,
+      discordAccountSchema.typeDefs,
+    ],
     resolvers: {
       ...scalarSchema.resolvers,
-      Query: {},
-      Mutation: {},
+      ...userSchema.resolvers,
+      ...discordAccountSchema.resolvers,
+      Query: {
+        ...userSchema.resolvers.Query,
+        ...discordAccountSchema.resolvers.Query,
+      },
+      Mutation: {
+        ...userSchema.resolvers.Mutation,
+        ...discordAccountSchema.resolvers.Mutation,
+      },
     },
   });
 };
