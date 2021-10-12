@@ -5,8 +5,8 @@ const argon = require('argon2');
 
 exports.typeDefs = gql`
   extend type Query {
-    user($input: UserSearchInput!): [User!]!
-    authenticate($nick: String!, $password: String!): User!
+    user(input: UserSearchInput!): [User!]!
+    authenticate(nick: String!, password: String!): User!
   }
 
   input UserSearchInput {
@@ -15,8 +15,13 @@ exports.typeDefs = gql`
   }
 
   extend type Mutation {
-    createUser($nick: String!, $password: String!, $email: String): User!
-    updateUser($id: UUID!, $input: UpdateUserInput!): User!
+    createUser(nick: String!, password: String!, email: String): User!
+    updateUser(id: UUID!, input: UpdateUserInput!): User!
+  }
+
+  input UpdateUserInput {
+    email: EmailAddress
+    password: String
   }
 
   type User {
@@ -49,14 +54,19 @@ exports.resolvers = {
 
   Mutation: {
     async createUser(root, { password, ...input }, { dataSources }) {
-      return dataSources.knex('users').insert({
-        ...input,
-        passwordHash: await argon.hash(password),
-      });
+      return dataSources.knex('users')
+        .insert({
+          ...input,
+          passwordHash: await argon.hash(password),
+        })
+        .returning('*')
+        .then(([a]) => a);
     },
 
     async updateUser(root, { id, input }, { dataSources }) {
-      await dataSources.knex('users').update(input).where('id', id);
+      const dbQuery = dataSources.knex('users').where('id', id);
+      if (input.password) dbQuery.update('passwordHash', await argon.hash(input.password));
+      if (input.email) dbQuery.update('email', input.email);
       return dataSources.knex('users').where('id', id).first();
     },
   },

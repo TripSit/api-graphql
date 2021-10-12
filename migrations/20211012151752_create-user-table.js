@@ -13,7 +13,8 @@ exports.up = async function up(knex) {
       table
         .string('nick', 32)
         .notNullable()
-        .unique();
+        .unique()
+        .index();
 
       table
         .text('passwordHash')
@@ -74,11 +75,38 @@ exports.up = async function up(knex) {
         .timestamp('createdAt')
         .notNullable()
         .defaultTo(knex.fn.now());
+    })
+    .createTable('userReports', table => {
+      table
+        .uuid('id')
+        .notNullable()
+        .defaultTo(knex.raw('uuid_generate_v4()'))
+        .primary();
+
+      table
+        .uuid('userId')
+        .notNullable()
+        .references('id')
+        .inTable('users');
+
+      table
+        .uuid('reportedByUserId')
+        .notNullable()
+        .references('id')
+        .inTable('users');
+
+      table.timestamp('expiresAt');
+
+      table
+        .timestamp('createdAt')
+        .notNullable()
+        .defaultTo(knex.fn.now());
     });
 };
 
 exports.down = async function down(knex) {
   await knex.schema
+    .dropTableIfExists('userReports')
     .dropTableIfExists('userRoles')
     .dropTableIfExists('roles')
     .dropTableIfExists('users')

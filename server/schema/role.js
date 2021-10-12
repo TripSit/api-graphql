@@ -8,7 +8,7 @@ exports.typeDefs = gql`
   }
 
   extend type Mutation {
-    createRole($input: CreateRoleInput!): Role!
+    createRole(input: CreateRoleInput!): Role!
   }
 
   input CreateRoleInput {

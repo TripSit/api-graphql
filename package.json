@@ -5,9 +5,11 @@
   "description": "GraphQL API for TripSit",
   "main": "./index.js",
   "scripts": {
-    "start": "node ./index.js",
-    "dev": "nodemon --inspect ./index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "NODE_ENV=production node ./index.js",
+    "dev": "NODE_ENV=development nodemon --inspect ./index.js",
+    "test": "npm run lint && npm run test:unit",
+    "lint": "eslint .",
+    "test:unit": "NODE_ENV=test jest"
   },
   "author": "SevenCats <sevencats@tripsit.me>",
   "license": "MIT",
@@ -28,6 +30,7 @@
     "eslint": "^7.32.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.25.1",
+    "eslint-plugin-jest": "^25.0.5",
     "jest": "^27.2.5",
     "nodemon": "^2.0.13"
   }

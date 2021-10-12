@@ -20,26 +20,26 @@ const baseTypeDefs = gql`
 module.exports = function createSchema() {
   return makeExecutableSchema({
     typeDefs: [
-      // baseTypeDefs,
-      // scalarSchema.typeDefs,
-      // userSchema.typeDefs,
-      // discordAccountSchema.typeDefs,
-      // roleSchema.typeDefs,
+      baseTypeDefs,
+      scalarSchema.typeDefs,
+      userSchema.typeDefs,
+      discordAccountSchema.typeDefs,
+      roleSchema.typeDefs,
     ],
     resolvers: {
-      // ...scalarSchema.resolvers,
-      // ...userSchema.resolvers,
-      // ...discordAccountSchema.resolvers,
-      // ...roleSchema.resolvers,
+      ...scalarSchema.resolvers,
+      ...userSchema.resolvers,
+      ...discordAccountSchema.resolvers,
+      ...roleSchema.resolvers,
       Query: {
-        // ...userSchema.resolvers.Query,
-        // ...discordAccountSchema.resolvers.Query,
-        // ...roleSchema.resolvers.Query,
+        ...userSchema.resolvers.Query,
+        ...discordAccountSchema.resolvers.Query,
+        ...roleSchema.resolvers.Query,
       },
       Mutation: {
-        // ...userSchema.resolvers.Mutation,
-        // ...discordAccountSchema.resolvers.Mutation,
-        // ...roleSchema.resolvers.Mutation,
+        ...userSchema.resolvers.Mutation,
+        ...discordAccountSchema.resolvers.Mutation,
+        ...roleSchema.resolvers.Mutation,
       },
     },
   });
