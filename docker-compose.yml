@@ -1,0 +1,15 @@
+version: '3.7'
+services:
+    postgres:
+        image: postgres:12-alpine
+        container_name: tripsit_api_db
+        restart: always
+        env_file: .env
+        ports:
+            - 5432:5432/tcp
+        volumes:
+            - tripsit_api_gql_data:/var/lib/postgresql/data
+volumes:
+    tripsit_api_gql_data:
+        name: tripsit_api_gql_psql
+        driver: local
