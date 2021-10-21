@@ -18,7 +18,7 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['**/__tests__/*.test.js'],
+      files: ['**/__tests__/*.test.js', './tests/**/*.spec.js', 'jest.setup.js'],
       extends: [
         'airbnb-base',
         'plugin:jest/recommended',

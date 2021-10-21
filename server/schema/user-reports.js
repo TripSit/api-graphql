@@ -4,7 +4,15 @@ const { gql } = require('apollo-server');
 
 exports.typeDefs = gql`
   extend type Mutation {
-    reportUser(reportedBy: UUID!, reportedTo: UUID!, report: CreateUserReport!): UserReport!
+    reportUser(report: CreateUserReport!): UserReport!
+  }
+
+  input CreateUserReport {
+    reportedTo: UUID!
+    reportedBy: UUID!
+    type: UserReportType!
+    note: String
+    expiresAt: DateTime
   }
 
   type UserReport {
@@ -26,11 +34,12 @@ exports.typeDefs = gql`
 
 exports.resolvers = {
   Mutation: {
-    async reportUser(root, { reportedBy, reportedTo, report }, { dataSources }) {
+    async reportUser(root, { report }, { dataSources }) {
+      const { reportedTo, reportedBy, ...xs } = report;
       dataSources.knex('userReports').insert({
         userId: reportedTo,
         reportedByUserId: reportedBy,
-        ...report,
+        ...xs,
       });
     },
   },

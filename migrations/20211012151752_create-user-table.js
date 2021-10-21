@@ -52,7 +52,7 @@ exports.up = async function up(knex) {
         .uuid('roleId')
         .notNullable()
         .references('id')
-        .inTable('roleId');
+        .inTable('roles');
 
       table
         .timestamp('createdAt')
@@ -95,6 +95,19 @@ exports.up = async function up(knex) {
         .references('id')
         .inTable('users');
 
+      table
+        .enum('type', [
+          'REPORT',
+          'NOTE',
+          'QUIET',
+          'BAN',
+        ], {
+          useNative: true,
+          enumName: 'user_report_type',
+        });
+
+      table.text('note');
+
       table.timestamp('expiresAt');
 
       table
@@ -107,9 +120,10 @@ exports.up = async function up(knex) {
 exports.down = async function down(knex) {
   await knex.schema
     .dropTableIfExists('userReports')
+    .dropTableIfExists('discordAccounts')
     .dropTableIfExists('userRoles')
     .dropTableIfExists('roles')
-    .dropTableIfExists('users')
-    .dropTableIfExists('discordAccounts');
+    .dropTableIfExists('users');
+  await knex.raw('DROP TYPE IF EXISTS "user_report_type"');
   await knex.raw('DROP EXTENSION IF EXISTS "uuid-ossp"');
 };
