@@ -21,7 +21,7 @@ exports.typeDefs = gql`
 exports.resolvers = {
   Query: {
     async discordAccount(root, { id }, { dataSources }) {
-      return dataSources.knex('discordAccounts')
+      return dataSources.db.knex('discordAccounts')
         .where('id', id)
         .first();
     },
@@ -29,13 +29,13 @@ exports.resolvers = {
 
   Mutation: {
     async createDiscordAccount(root, { id }, { dataSources }) {
-      await dataSources.knex('discordAccounts').insert({ id });
+      await dataSources.db.knex('discordAccounts').insert({ id });
     },
   },
 
   DiscordAccount: {
     async user(discordAccount, params, { dataSources }) {
-      return !discordAccount.userId ? null : dataSources.knex('users')
+      return !discordAccount.userId ? null : dataSources.db.knex('users')
         .where('id', discordAccount.userId)
         .first();
     },

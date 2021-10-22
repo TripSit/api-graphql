@@ -36,7 +36,7 @@ exports.resolvers = {
   Mutation: {
     async reportUser(root, { report }, { dataSources }) {
       const { reportedTo, reportedBy, ...xs } = report;
-      dataSources.knex('userReports').insert({
+      dataSources.db.knex('userReports').insert({
         userId: reportedTo,
         reportedByUserId: reportedBy,
         ...xs,
@@ -46,11 +46,11 @@ exports.resolvers = {
 
   UserReport: {
     async user(userReport, params, { dataSources }) {
-      return dataSources.knex('users').where('id', userReport.userId);
+      return dataSources.db.knex('users').where('id', userReport.userId);
     },
 
     async reportedBy(userReport, params, { dataSources }) {
-      return dataSources.knex('users').where('id', userReport.reportedByUserId);
+      return dataSources.db.knex('users').where('id', userReport.reportedByUserId);
     },
   },
 };

@@ -23,6 +23,11 @@ exports.up = async function up(knex) {
       table.string('email', 320);
 
       table
+        .uuid('createdBy')
+        .references('id')
+        .inTable('users');
+
+      table
         .timestamp('createdAt')
         .notNullable()
         .defaultTo(knex.fn.now());
@@ -53,6 +58,12 @@ exports.up = async function up(knex) {
         .notNullable()
         .references('id')
         .inTable('roles');
+
+      table
+        .uuid('createdBy')
+        .notNullable()
+        .references('id')
+        .inTable('users');
 
       table
         .timestamp('createdAt')
@@ -90,12 +101,6 @@ exports.up = async function up(knex) {
         .inTable('users');
 
       table
-        .uuid('reportedByUserId')
-        .notNullable()
-        .references('id')
-        .inTable('users');
-
-      table
         .enum('type', [
           'REPORT',
           'NOTE',
@@ -109,6 +114,12 @@ exports.up = async function up(knex) {
       table.text('note');
 
       table.timestamp('expiresAt');
+
+      table
+        .uuid('createdBy')
+        .notNullable()
+        .references('id')
+        .inTable('users');
 
       table
         .timestamp('createdAt')

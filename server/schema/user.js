@@ -5,7 +5,7 @@ const argon = require('argon2');
 
 exports.typeDefs = gql`
   extend type Query {
-    user(input: UserSearchInput!): [User!]!
+    users(input: UserSearchInput!): [User!]!
     authenticate(nick: String!, password: String!): User!
   }
 
@@ -36,15 +36,15 @@ exports.typeDefs = gql`
 
 exports.resolvers = {
   Query: {
-    async user(root, { input }, { dataSources }) {
-      const dbQuery = dataSources.knex('users').select('id', 'nick', 'email', 'createdAt');
+    async users(root, { input }, { dataSources }) {
+      const dbQuery = dataSources.db.knex('users').select('id', 'nick', 'email', 'createdAt');
       if (input.id) dbQuery.where('id', input.id);
       if (input.nick) dbQuery.where('nick', input.nick);
       return dbQuery;
     },
 
     async authenticate(root, { nick, password }, { dataSources }) {
-      const { passwordHash, ...user } = await dataSources.knex('users')
+      const { passwordHash, ...user } = await dataSources.db.knex('users')
         .where('nick', nick)
         .first();
       if (!(await argon.verify(passwordHash, password))) throw new AuthenticationError();

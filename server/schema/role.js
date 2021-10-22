@@ -27,13 +27,13 @@ exports.typeDefs = gql`
 exports.resolvers = {
   Query: {
     async roles(root, params, { dataSources }) {
-      return dataSources.knex('roles').select('*');
+      return dataSources.db.knex('roles').select('*');
     },
   },
 
   Mutation: {
     async createRole(root, { input }, { dataSources }) {
-      return dataSources.knex('roles')
+      return dataSources.db.knex('roles')
         .insert(input)
         .returning('*')
         .then(([record]) => record);
@@ -42,7 +42,7 @@ exports.resolvers = {
 
   Role: {
     async users(role, params, { dataSources }) {
-      return dataSources.knex('users')
+      return dataSources.db.knex('users')
         .innerJoin('userRoles', 'userRoles.userId', 'users.id')
         .where('userRoles.roleId', role.id)
         .select('users.*', 'userRoles.createdAt');
