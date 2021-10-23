@@ -45,7 +45,9 @@ exports.resolvers = {
     async users(root, { input }, { dataSources }) {
       const dbQuery = dataSources.db.knex('users').select('id', 'nick', 'email', 'createdAt');
       if (input?.id) dbQuery.where('id', input.id);
-      if (input?.nick) dbQuery.where('nick', input.nick);
+      if (input?.nick) {
+        dbQuery.where(dataSources.db.knex.raw('LOWER("nick") = ?', input.nick.toLowerCase()));
+      }
       return dbQuery;
     },
 
