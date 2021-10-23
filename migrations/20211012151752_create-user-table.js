@@ -20,12 +20,7 @@ exports.up = async function up(knex) {
         .text('passwordHash')
         .notNullable();
 
-      table.string('email', 320);
-
-      table
-        .uuid('createdBy')
-        .references('id')
-        .inTable('users');
+      table.string('email', 320).unique();
 
       table
         .timestamp('createdAt')

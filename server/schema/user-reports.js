@@ -3,6 +3,10 @@
 const { gql } = require('apollo-server');
 
 exports.typeDefs = gql`
+  extend type Query {
+    userReports(userId: UUID!, types: [UserReportType!]): [UserReport!]!
+  }
+
   extend type Mutation {
     reportUser(report: CreateUserReport!): UserReport!
   }
@@ -33,6 +37,16 @@ exports.typeDefs = gql`
 `;
 
 exports.resolvers = {
+  Query: {
+    async userReports(root, { userId, types }, { dataSources }) {
+      const dbQuery = dataSources.db.knex('userReports').where('userId', userId);
+      types.forEach(type => {
+        dbQuery.where('type', type);
+      });
+      return dbQuery;
+    },
+  },
+
   Mutation: {
     async reportUser(root, { report }, { dataSources }) {
       const { reportedTo, reportedBy, ...xs } = report;
@@ -50,7 +64,7 @@ exports.resolvers = {
     },
 
     async reportedBy(userReport, params, { dataSources }) {
-      return dataSources.db.knex('users').where('id', userReport.reportedByUserId);
+      return dataSources.db.knex('users').where('id', userReport.createdBy);
     },
   },
 };

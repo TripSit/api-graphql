@@ -5,7 +5,7 @@ const argon = require('argon2');
 
 exports.typeDefs = gql`
   extend type Query {
-    users(input: UserSearchInput!): [User!]!
+    users(input: UserSearchInput): [User!]!
     authenticate(nick: String!, password: String!): User!
   }
 
@@ -15,8 +15,14 @@ exports.typeDefs = gql`
   }
 
   extend type Mutation {
-    createUser(nick: String!, password: String!, email: String): User!
+    createUser(input: CreateUserInput!): User!
     updateUser(id: UUID!, input: UpdateUserInput!): User!
+  }
+
+  input CreateUserInput {
+    nick: String!
+    password: String!
+    email: EmailAddress
   }
 
   input UpdateUserInput {
@@ -38,8 +44,8 @@ exports.resolvers = {
   Query: {
     async users(root, { input }, { dataSources }) {
       const dbQuery = dataSources.db.knex('users').select('id', 'nick', 'email', 'createdAt');
-      if (input.id) dbQuery.where('id', input.id);
-      if (input.nick) dbQuery.where('nick', input.nick);
+      if (input?.id) dbQuery.where('id', input.id);
+      if (input?.nick) dbQuery.where('nick', input.nick);
       return dbQuery;
     },
 
@@ -53,34 +59,35 @@ exports.resolvers = {
   },
 
   Mutation: {
-    async createUser(root, { password, ...input }, { dataSources }) {
-      return dataSources.knex('users')
+    async createUser(root, { input }, { dataSources }) {
+      return dataSources.db.knex('users')
         .insert({
-          ...input,
-          passwordHash: await argon.hash(password),
+          nick: input.nick,
+          passwordHash: await argon.hash(input.password),
+          email: input.email,
         })
         .returning('*')
         .then(([a]) => a);
     },
 
     async updateUser(root, { id, input }, { dataSources }) {
-      const dbQuery = dataSources.knex('users').where('id', id);
+      const dbQuery = dataSources.db.knex('users').where('id', id);
       if (input.password) dbQuery.update('passwordHash', await argon.hash(input.password));
       if (input.email) dbQuery.update('email', input.email);
-      return dataSources.knex('users').where('id', id).first();
+      return dataSources.db.knex('users').where('id', id).first();
     },
   },
 
   User: {
     async discordAccounts(user, params, { dataSources }) {
-      return dataSources.knex('discordAccounts')
+      return dataSources.db.knex('discordAccounts')
         .select('id', 'createdAt')
         .innerJoin('users', 'users.id', 'discordAccounts.userId')
         .where('users.id', user.id);
     },
 
     async roles(user, params, { dataSources }) {
-      return dataSources.knex('roles')
+      return dataSources.db.knex('roles')
         .innerJoin('userRoles', 'userRoles.roleId', 'roles.id')
         .where('userRoles.userId', user.id)
         .select('roles.*');
