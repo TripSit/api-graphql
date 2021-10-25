@@ -9,6 +9,7 @@ exports.typeDefs = gql`
 
   extend type Mutation {
     createRole(input: CreateRoleInput!): Role!
+    removeRole(roleId: UUID!): Void
   }
 
   input CreateRoleInput {
@@ -38,6 +39,12 @@ exports.resolvers = {
         .insert(input)
         .returning('*')
         .then(([record]) => record);
+    },
+
+    async removeRole(root, { roleId }, { dataSources }) {
+      await dataSources.db.knex('roles')
+        .where('id', roleId)
+        .del();
     },
   },
 
