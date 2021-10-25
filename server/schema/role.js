@@ -19,6 +19,7 @@ exports.typeDefs = gql`
   type Role {
     id: ID!
     name: String!
+    slug: String!
     description: String
     users: [User!]!
   }
@@ -27,7 +28,7 @@ exports.typeDefs = gql`
 exports.resolvers = {
   Query: {
     async roles(root, params, { dataSources }) {
-      return dataSources.db.knex('roles').select('*');
+      return dataSources.db.knex('roles').orderBy('name');
     },
   },
 
@@ -41,6 +42,10 @@ exports.resolvers = {
   },
 
   Role: {
+    slug(role) {
+      return role.name.toLowerCase().replace(/\s+/g, '-');
+    },
+
     async users(role, params, { dataSources }) {
       return dataSources.db.knex('users')
         .innerJoin('userRoles', 'userRoles.userId', 'users.id')

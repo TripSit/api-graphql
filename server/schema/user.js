@@ -16,7 +16,7 @@ exports.typeDefs = gql`
 
   extend type Mutation {
     createUser(input: CreateUserInput!): User!
-    updateUser(id: UUID!, input: UpdateUserInput!): User!
+    updateUser(userId: UUID!, input: UpdateUserInput!): User!
   }
 
   input CreateUserInput {
@@ -35,7 +35,7 @@ exports.typeDefs = gql`
     nick: String!
     email: EmailAddress
     discordAccounts: [DiscordAccount!]!
-    roles: [Role!]!
+    roles: [UserRole!]!
     createdAt: DateTime!
   }
 `;
@@ -78,6 +78,31 @@ exports.resolvers = {
       if (input.email) dbQuery.update('email', input.email);
       return dataSources.db.knex('users').where('id', id).first();
     },
+
+    async updateUserRoles(root, { userId, roleIds }, { dataSources }) {
+      return dataSources.db.knex.transacting(async trx => {
+        const currentUserRoleIds = await trx('userRoles')
+          .where('userId', userId)
+          .select('id');
+
+        await Promise.all([
+          roleIds
+            .filter(roleId => !currentUserRoleIds.includes(roleId))
+            .reduce(
+              (query, roleId) => query.insert({ userId, roleId }),
+              dataSources.db.knex('userRoles'),
+            ),
+          currentUserRoleIds
+            .filter(roleId => !roleIds.includes(roleId))
+            .reduce(
+              (query, roleId) => query.where('roleId', roleId),
+              dataSources.db.knex('userRoles').del(),
+            ),
+        ]);
+
+        return dataSources.db.knex('userRoles').where('userId', userId);
+      });
+    },
   },
 
   User: {
@@ -93,6 +118,16 @@ exports.resolvers = {
         .innerJoin('userRoles', 'userRoles.roleId', 'roles.id')
         .where('userRoles.userId', user.id)
         .select('roles.*');
+    },
+  },
+
+  UserRole: {
+    async user(userRole, params, { dataSources }) {
+      return dataSources.db.knex('users').where('id', userRole.userId).first();
+    },
+
+    async role(userRole, params, { dataSources }) {
+      return dataSources.db.knex('roles').where('id', userRole.roleId).first();
     },
   },
 };

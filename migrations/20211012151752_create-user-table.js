@@ -43,6 +43,12 @@ exports.up = async function up(knex) {
     })
     .createTable('userRoles', table => {
       table
+        .uuid('id')
+        .notNullable()
+        .defaultTo(knex.raw('uuid_generate_v4()'))
+        .primary();
+
+      table
         .uuid('userId')
         .notNullable()
         .references('id')
