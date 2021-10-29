@@ -4,11 +4,11 @@ const { gql } = require('apollo-server');
 
 exports.typeDefs = gql`
   extend type Query {
-    discordAccount($id: String!): DiscordAccount!
+    discordAccount(id: String!): DiscordAccount!
   }
 
   extend type Mutation {
-    createDiscordAccount($id: String!): Void
+    createDiscordAccount(id: String!): Void
   }
 
   type DiscordAccount {
