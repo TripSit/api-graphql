@@ -10,7 +10,7 @@ module.exports = function createServer({ logger }) {
   return new ApolloServer({
     dataSources,
     connectToDevTools: NODE_ENV !== 'production',
-    schema: createSchema(),
+    schema: createSchema(logger),
     plugins: [responseCachePlugin()],
     context() {
       return {
