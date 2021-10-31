@@ -40,7 +40,7 @@ exports.up = async function up(knex) {
         .notNullable()
         .defaultTo(knex.fn.now());
     })
-    .createTable('userReports', table => {
+    .createTable('userNotes', table => {
       table
         .uuid('id')
         .notNullable()
@@ -61,11 +61,16 @@ exports.up = async function up(knex) {
           'BAN',
         ], {
           useNative: true,
-          enumName: 'user_report_type',
+          enumName: 'user_note_type',
         })
         .notNullable();
 
-      table.text('note');
+      table.text('text');
+
+      table
+        .boolean('isDeleted')
+        .notNullable()
+        .defaultTo(false);
 
       table.timestamp('expiresAt');
 
@@ -84,9 +89,9 @@ exports.up = async function up(knex) {
 
 exports.down = async function down(knex) {
   await knex.schema
-    .dropTableIfExists('userReports')
+    .dropTableIfExists('userNotes')
     .dropTableIfExists('users');
   await knex.raw('DROP TYPE IF EXISTS "user_access_level"');
-  await knex.raw('DROP TYPE IF EXISTS "user_report_type"');
+  await knex.raw('DROP TYPE IF EXISTS "user_note_type"');
   await knex.raw('DROP EXTENSION IF EXISTS "uuid-ossp"');
 };

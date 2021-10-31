@@ -17,6 +17,7 @@ exports.typeDefs = gql`
   extend type Mutation {
     createUser(input: CreateUserInput!): User!
     updateUser(userId: UUID!, input: UpdateUserInput!): User!
+    createUserNote(note: CreateUserNote!): UserNote!
   }
 
   input CreateUserInput {
@@ -31,11 +32,20 @@ exports.typeDefs = gql`
     accessLevel: UserAccessLevel
   }
 
+  input CreateUserNote {
+    reportedTo: UUID!
+    reportedBy: UUID!
+    type: UserNoteType!
+    note: String
+    expiresAt: DateTime
+  }
+
   type User {
     id: ID!
     nick: String!
     email: EmailAddress
     accessLevel: UserAccessLevel!
+    notes: [UserNote!]!
     createdAt: DateTime!
   }
 
@@ -44,6 +54,23 @@ exports.typeDefs = gql`
     MODERATOR
     TRIPSITTER
     USER
+  }
+
+  type UserNote {
+    id: ID!
+    user: User!
+    type: UserNoteType!
+    text: String
+    reportedBy: User!
+    expiresAt: DateTime
+    createdAt: DateTime!
+  }
+
+  enum UserNoteType {
+    REPORT
+    NOTE
+    QUIET
+    BAN
   }
 `;
 
@@ -88,29 +115,36 @@ exports.resolvers = {
       return dataSources.db.knex('users').where('id', userId).first();
     },
 
-    // async updateUserRoles(root, { userId, roleIds }, { dataSources }) {
-    //   return dataSources.db.knex.transacting(async trx => {
-    //     const currentUserRoleIds = await trx('userRoles')
-    //       .where('userId', userId)
-    //       .select('id');
+    async createUserNote(root, { report }, { dataSources }) {
+      const { reportedTo, reportedBy, ...xs } = report;
+      dataSources.db.knex('userNotes').insert({
+        userId: reportedTo,
+        reportedByUserId: reportedBy,
+        ...xs,
+      });
+    },
+  },
 
-    //     await Promise.all([
-    //       roleIds
-    //         .filter(roleId => !currentUserRoleIds.includes(roleId))
-    //         .reduce(
-    //           (query, roleId) => query.insert({ userId, roleId }),
-    //           dataSources.db.knex('userRoles'),
-    //         ),
-    //       currentUserRoleIds
-    //         .filter(roleId => !roleIds.includes(roleId))
-    //         .reduce(
-    //           (query, roleId) => query.where('roleId', roleId),
-    //           dataSources.db.knex('userRoles').del(),
-    //         ),
-    //     ]);
+  User: {
+    async notes(user, params, { dataSources }) {
+      return dataSources.db.knex('userNotes')
+        .where('userId', user.id)
+        .where('isDeleted', false)
+        .orderBy('createdAt');
+    },
+  },
 
-    //     return dataSources.db.knex('userRoles').where('userId', userId);
-    //   });
-    // },
+  UserNote: {
+    async user(note, params, { dataSources }) {
+      return dataSources.db.knex('users')
+        .where('id', note.userId)
+        .first();
+    },
+
+    async reportedBy(note, params, { dataSources }) {
+      return dataSources.db.knex('users')
+        .where('id', note.createdBy)
+        .first();
+    },
   },
 };
