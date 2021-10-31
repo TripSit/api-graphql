@@ -23,65 +23,17 @@ exports.up = async function up(knex) {
       table.string('email', 320).unique();
 
       table
-        .timestamp('createdAt')
+        .enum('accessLevel', [
+          'USER',
+          'TRIPSITTER',
+          'MODERATOR',
+          'ADMINISTRATOR',
+        ], {
+          useNative: true,
+          enumName: 'user_access_level',
+        })
         .notNullable()
-        .defaultTo(knex.fn.now());
-    })
-    .createTable('roles', table => {
-      table
-        .uuid('id')
-        .notNullable()
-        .defaultTo(knex.raw('uuid_generate_v4()'))
-        .primary();
-
-      table
-        .text('name')
-        .notNullable()
-        .unique();
-
-      table.text('description');
-    })
-    .createTable('userRoles', table => {
-      table
-        .uuid('id')
-        .notNullable()
-        .defaultTo(knex.raw('uuid_generate_v4()'))
-        .primary();
-
-      table
-        .uuid('userId')
-        .notNullable()
-        .references('id')
-        .inTable('users');
-
-      table
-        .uuid('roleId')
-        .notNullable()
-        .references('id')
-        .inTable('roles');
-
-      table
-        .uuid('createdBy')
-        .notNullable()
-        .references('id')
-        .inTable('users');
-
-      table
-        .timestamp('createdAt')
-        .notNullable()
-        .defaultTo(knex.fn.now());
-    })
-    .createTable('discordAccounts', table => {
-      table
-        .string('id', 18)
-        .notNullable()
-        .unique()
-        .primary();
-
-      table
-        .uuid('userId')
-        .references('id')
-        .inTable('users');
+        .defaultTo('USER');
 
       table
         .timestamp('createdAt')
@@ -110,7 +62,8 @@ exports.up = async function up(knex) {
         ], {
           useNative: true,
           enumName: 'user_report_type',
-        });
+        })
+        .notNullable();
 
       table.text('note');
 
@@ -132,10 +85,8 @@ exports.up = async function up(knex) {
 exports.down = async function down(knex) {
   await knex.schema
     .dropTableIfExists('userReports')
-    .dropTableIfExists('discordAccounts')
-    .dropTableIfExists('userRoles')
-    .dropTableIfExists('roles')
     .dropTableIfExists('users');
+  await knex.raw('DROP TYPE IF EXISTS "user_access_level"');
   await knex.raw('DROP TYPE IF EXISTS "user_report_type"');
   await knex.raw('DROP EXTENSION IF EXISTS "uuid-ossp"');
 };

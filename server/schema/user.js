@@ -28,22 +28,29 @@ exports.typeDefs = gql`
   input UpdateUserInput {
     email: EmailAddress
     password: String
+    accessLevel: UserAccessLevel
   }
 
   type User {
     id: ID!
     nick: String!
     email: EmailAddress
-    discordAccounts: [DiscordAccount!]!
-    roles: [UserRole!]!
+    accessLevel: UserAccessLevel!
     createdAt: DateTime!
+  }
+
+  enum UserAccessLevel {
+    ADMINISTRATOR
+    MODERATOR
+    TRIPSITTER
+    USER
   }
 `;
 
 exports.resolvers = {
   Query: {
     async users(root, { input }, { dataSources }) {
-      const dbQuery = dataSources.db.knex('users').select('id', 'nick', 'email', 'createdAt');
+      const dbQuery = dataSources.db.knex('users');
       if (input?.id) dbQuery.where('id', input.id);
       if (input?.nick) {
         dbQuery.where(dataSources.db.knex.raw('LOWER("nick") = ?', input.nick.toLowerCase()));
@@ -72,62 +79,38 @@ exports.resolvers = {
         .then(([a]) => a);
     },
 
-    async updateUser(root, { id, input }, { dataSources }) {
-      const dbQuery = dataSources.db.knex('users').where('id', id);
+    async updateUser(root, { userId, input }, { dataSources }) {
+      const dbQuery = dataSources.db.knex('users').where('id', userId);
       if (input.password) dbQuery.update('passwordHash', await argon.hash(input.password));
       if (input.email) dbQuery.update('email', input.email);
-      return dataSources.db.knex('users').where('id', id).first();
+      if (input.accessLevel) dbQuery.update('accessLevel', input.accessLevel);
+      await dbQuery;
+      return dataSources.db.knex('users').where('id', userId).first();
     },
 
-    async updateUserRoles(root, { userId, roleIds }, { dataSources }) {
-      return dataSources.db.knex.transacting(async trx => {
-        const currentUserRoleIds = await trx('userRoles')
-          .where('userId', userId)
-          .select('id');
+    // async updateUserRoles(root, { userId, roleIds }, { dataSources }) {
+    //   return dataSources.db.knex.transacting(async trx => {
+    //     const currentUserRoleIds = await trx('userRoles')
+    //       .where('userId', userId)
+    //       .select('id');
 
-        await Promise.all([
-          roleIds
-            .filter(roleId => !currentUserRoleIds.includes(roleId))
-            .reduce(
-              (query, roleId) => query.insert({ userId, roleId }),
-              dataSources.db.knex('userRoles'),
-            ),
-          currentUserRoleIds
-            .filter(roleId => !roleIds.includes(roleId))
-            .reduce(
-              (query, roleId) => query.where('roleId', roleId),
-              dataSources.db.knex('userRoles').del(),
-            ),
-        ]);
+    //     await Promise.all([
+    //       roleIds
+    //         .filter(roleId => !currentUserRoleIds.includes(roleId))
+    //         .reduce(
+    //           (query, roleId) => query.insert({ userId, roleId }),
+    //           dataSources.db.knex('userRoles'),
+    //         ),
+    //       currentUserRoleIds
+    //         .filter(roleId => !roleIds.includes(roleId))
+    //         .reduce(
+    //           (query, roleId) => query.where('roleId', roleId),
+    //           dataSources.db.knex('userRoles').del(),
+    //         ),
+    //     ]);
 
-        return dataSources.db.knex('userRoles').where('userId', userId);
-      });
-    },
-  },
-
-  User: {
-    async discordAccounts(user, params, { dataSources }) {
-      return dataSources.db.knex('discordAccounts')
-        .select('id', 'createdAt')
-        .innerJoin('users', 'users.id', 'discordAccounts.userId')
-        .where('users.id', user.id);
-    },
-
-    async roles(user, params, { dataSources }) {
-      return dataSources.db.knex('roles')
-        .innerJoin('userRoles', 'userRoles.roleId', 'roles.id')
-        .where('userRoles.userId', user.id)
-        .select('roles.*');
-    },
-  },
-
-  UserRole: {
-    async user(userRole, params, { dataSources }) {
-      return dataSources.db.knex('users').where('id', userRole.userId).first();
-    },
-
-    async role(userRole, params, { dataSources }) {
-      return dataSources.db.knex('roles').where('id', userRole.roleId).first();
-    },
+    //     return dataSources.db.knex('userRoles').where('userId', userId);
+    //   });
+    // },
   },
 };
