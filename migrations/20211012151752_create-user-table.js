@@ -13,20 +13,34 @@ exports.up = async function up(knex) {
       table
         .string('nick', 32)
         .notNullable()
-        .unique();
+        .unique()
+        .index();
 
       table
         .text('passwordHash')
         .notNullable();
 
-      table.string('email', 320);
+      table.string('email', 320).unique();
+
+      table
+        .enum('accessLevel', [
+          'USER',
+          'TRIPSITTER',
+          'MODERATOR',
+          'ADMINISTRATOR',
+        ], {
+          useNative: true,
+          enumName: 'user_access_level',
+        })
+        .notNullable()
+        .defaultTo('USER');
 
       table
         .timestamp('createdAt')
         .notNullable()
         .defaultTo(knex.fn.now());
     })
-    .createTable('roles', table => {
+    .createTable('userNotes', table => {
       table
         .uuid('id')
         .notNullable()
@@ -34,39 +48,35 @@ exports.up = async function up(knex) {
         .primary();
 
       table
-        .text('name')
-        .notNullable()
-        .unique();
-
-      table.text('description');
-    })
-    .createTable('userRoles', table => {
-      table
         .uuid('userId')
         .notNullable()
         .references('id')
         .inTable('users');
 
       table
-        .uuid('roleId')
-        .notNullable()
-        .references('id')
-        .inTable('roleId');
+        .enum('type', [
+          'REPORT',
+          'NOTE',
+          'QUIET',
+          'BAN',
+        ], {
+          useNative: true,
+          enumName: 'user_note_type',
+        })
+        .notNullable();
+
+      table.text('text');
 
       table
-        .timestamp('createdAt')
+        .boolean('isDeleted')
         .notNullable()
-        .defaultTo(knex.fn.now());
-    })
-    .createTable('discordAccounts', table => {
-      table
-        .string('id', 18)
-        .notNullable()
-        .unique()
-        .primary();
+        .defaultTo(false);
+
+      table.timestamp('expiresAt');
 
       table
-        .uuid('userId')
+        .uuid('createdBy')
+        .notNullable()
         .references('id')
         .inTable('users');
 
@@ -79,9 +89,9 @@ exports.up = async function up(knex) {
 
 exports.down = async function down(knex) {
   await knex.schema
-    .dropTableIfExists('userRoles')
-    .dropTableIfExists('roles')
-    .dropTableIfExists('users')
-    .dropTableIfExists('discordAccounts');
+    .dropTableIfExists('userNotes')
+    .dropTableIfExists('users');
+  await knex.raw('DROP TYPE IF EXISTS "user_access_level"');
+  await knex.raw('DROP TYPE IF EXISTS "user_note_type"');
   await knex.raw('DROP EXTENSION IF EXISTS "uuid-ossp"');
 };
