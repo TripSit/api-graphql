@@ -4,8 +4,7 @@ const { gql } = require('apollo-server');
 const { makeExecutableSchema } = require('@graphql-tools/schema');
 const scalarSchema = require('./scalar');
 const userSchema = require('./user');
-const discordAccountSchema = require('./discord-account');
-const roleSchema = require('./role');
+const userNoteSchema = require('./user-note');
 
 const baseTypeDefs = gql`
   type Query {
@@ -15,16 +14,6 @@ const baseTypeDefs = gql`
   type Mutation {
     _empty: Void
   }
-
-  directive @cacheControl(
-    maxAge: Int
-    scope: CacheControlScope
-  ) on FIELD_DEFINITION | OBJECT | INTERFACE
-
-  enum CacheControlScope {
-    PUBLIC
-    PRIVATE
-  }
 `;
 
 module.exports = function createSchema() {
@@ -33,23 +22,19 @@ module.exports = function createSchema() {
       baseTypeDefs,
       scalarSchema.typeDefs,
       userSchema.typeDefs,
-      discordAccountSchema.typeDefs,
-      roleSchema.typeDefs,
+      userNoteSchema.typeDefs,
     ],
     resolvers: {
       ...scalarSchema.resolvers,
       ...userSchema.resolvers,
-      ...discordAccountSchema.resolvers,
-      ...roleSchema.resolvers,
+      ...userNoteSchema.resolvers,
       Query: {
         ...userSchema.resolvers.Query,
-        ...discordAccountSchema.resolvers.Query,
-        ...roleSchema.resolvers.Query,
+        ...userNoteSchema.resolvers.Query,
       },
       Mutation: {
         ...userSchema.resolvers.Mutation,
-        ...discordAccountSchema.resolvers.Mutation,
-        ...roleSchema.resolvers.Mutation,
+        ...userNoteSchema.resolvers.Mutation,
       },
     },
   });
