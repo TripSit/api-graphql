@@ -17,7 +17,6 @@ exports.typeDefs = gql`
   extend type Mutation {
     createUser(input: CreateUserInput!): User!
     updateUser(userId: UUID!, input: UpdateUserInput!): User!
-    createUserNote(note: CreateUserNote!): UserNote!
   }
 
   input CreateUserInput {
@@ -30,14 +29,6 @@ exports.typeDefs = gql`
     email: EmailAddress
     password: String
     accessLevel: UserAccessLevel
-  }
-
-  input CreateUserNote {
-    reportedTo: UUID!
-    reportedBy: UUID!
-    type: UserNoteType!
-    note: String
-    expiresAt: DateTime
   }
 
   type User {
@@ -54,23 +45,6 @@ exports.typeDefs = gql`
     MODERATOR
     TRIPSITTER
     USER
-  }
-
-  type UserNote {
-    id: ID!
-    user: User!
-    type: UserNoteType!
-    text: String
-    reportedBy: User!
-    expiresAt: DateTime
-    createdAt: DateTime!
-  }
-
-  enum UserNoteType {
-    REPORT
-    NOTE
-    QUIET
-    BAN
   }
 `;
 
@@ -114,15 +88,6 @@ exports.resolvers = {
       await dbQuery;
       return dataSources.db.knex('users').where('id', userId).first();
     },
-
-    async createUserNote(root, { report }, { dataSources }) {
-      const { reportedTo, reportedBy, ...xs } = report;
-      dataSources.db.knex('userNotes').insert({
-        userId: reportedTo,
-        reportedByUserId: reportedBy,
-        ...xs,
-      });
-    },
   },
 
   User: {
@@ -131,20 +96,6 @@ exports.resolvers = {
         .where('userId', user.id)
         .where('isDeleted', false)
         .orderBy('createdAt');
-    },
-  },
-
-  UserNote: {
-    async user(note, params, { dataSources }) {
-      return dataSources.db.knex('users')
-        .where('id', note.userId)
-        .first();
-    },
-
-    async reportedBy(note, params, { dataSources }) {
-      return dataSources.db.knex('users')
-        .where('id', note.createdBy)
-        .first();
     },
   },
 };
