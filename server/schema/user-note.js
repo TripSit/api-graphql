@@ -5,6 +5,7 @@ const { gql } = require('apollo-server');
 exports.typeDefs = gql`
   extend type Mutation {
     createUserNote(note: CreateUserNote!): UserNote!
+    deleteUserNote(noteId: UUID!): Void
   }
 
   input CreateUserNote {
@@ -45,6 +46,12 @@ exports.resolvers = {
         })
         .returning('*')
         .then(([newNote]) => newNote);
+    },
+
+    async deleteUserNote(root, { noteId }, { dataSources }) {
+      await dataSources.db.knex('userNotes')
+        .update('isDeleted', true)
+        .where('id', noteId);
     },
   },
 
