@@ -2,6 +2,7 @@
 
 const { gql, AuthenticationError } = require('apollo-server');
 const argon = require('argon2');
+const discordUserResolver = require('./resolvers/discord-user');
 
 exports.typeDefs = gql`
   extend type Query {
@@ -37,6 +38,7 @@ exports.typeDefs = gql`
     email: EmailAddress
     accessLevel: UserAccessLevel!
     notes: [UserNote!]!
+    discord: DiscordUser
     createdAt: DateTime!
   }
 
@@ -96,6 +98,15 @@ exports.resolvers = {
         .where('userId', user.id)
         .where('isDeleted', false)
         .orderBy('createdAt');
+    },
+
+    async discord(user, params, { dataSources }) {
+      const dbRecord = await dataSources.db.knex('discordUsers')
+        .where('userId', user.id)
+        .first();
+      if (!dbRecord) return null;
+      const apiRes = await dataSources.discord.getUserById(dbRecord.id);
+      return discordUserResolver(dbRecord, apiRes);
     },
   },
 };
