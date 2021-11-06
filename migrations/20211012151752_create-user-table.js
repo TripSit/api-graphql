@@ -84,11 +84,28 @@ exports.up = async function up(knex) {
         .timestamp('createdAt')
         .notNullable()
         .defaultTo(knex.fn.now());
+    })
+    .createTable('discordUsers', table => {
+      table
+        .specificType('id', 'CHAR(18)')
+        .notNullable()
+        .primary();
+
+      table
+        .uuid('userId')
+        .references('id')
+        .inTable('users');
+
+      table
+        .timestamp('createdAt')
+        .notNullable()
+        .defaultTo(knex.fn.now());
     });
 };
 
 exports.down = async function down(knex) {
   await knex.schema
+    .dropTableIfExists('discordUsers')
     .dropTableIfExists('userNotes')
     .dropTableIfExists('users');
   await knex.raw('DROP TYPE IF EXISTS "user_access_level"');
