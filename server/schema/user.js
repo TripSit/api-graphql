@@ -104,6 +104,7 @@ exports.resolvers = {
       const dbRecord = await dataSources.db.knex('discordUsers')
         .where('userId', user.id)
         .first();
+      if (!dbRecord) return null;
       const apiRes = await dataSources.discord.getUserById(dbRecord.id);
       return discordUserResolver(dbRecord, apiRes);
     },

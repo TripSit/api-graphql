@@ -6,7 +6,11 @@ const discordUserResolver = require('./resolvers/discord-user');
 exports.typeDefs = gql`
   extend type Mutation {
     createDiscordUser(discordUserId: String!): DiscordUser!
-    associateDiscordUser(userId: UUID!, discordUserId: String!): Void
+    updateDiscordUser(discordUserId: String!, input: UpdateDiscordUserInput!): DiscordUser!
+  }
+
+  input UpdateDiscordUserInput {
+    userId: UUID
   }
 
   type DiscordUser {
@@ -33,15 +37,17 @@ exports.resolvers = {
         .then(([apiRes, dbRecord]) => discordUserResolver(dbRecord, apiRes));
     },
 
-    async associateDiscordUser(root, { userId, discordUserId }, { dataSources }) {
-      const query = dataSources.db.knex('discordUsers')
-        .innerJoin('users', 'users.id', 'discordUsers.userId')
-        .select('discordUsers.*')
-        .first();
-      if (discordUserId) query.where('discordUsers.id', discordUserId);
-      if (userId) query.where('users.id', userId);
-      const discordUser = await query;
-      return discordUser || null;
+    async updateDiscordUser(root, { discordUserId, input }, { dataSources }) {
+      return Promise.all([
+        dataSources.discord.getUserById(discordUserId),
+        dataSources.db.knex.transacting(async trx => {
+          const updateQuery = trx('discordUsers').where('id', discordUserId);
+          if (input.userId) updateQuery.update('userId', input.userId);
+          await updateQuery;
+          return trx('discordUsers').where('id', discordUserId).first();
+        }),
+      ])
+        .then(([apiRes, dbRecord]) => discordUserResolver(dbRecord, apiRes));
     },
   },
 
