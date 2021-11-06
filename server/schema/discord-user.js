@@ -6,11 +6,8 @@ const discordUserResolver = require('./resolvers/discord-user');
 exports.typeDefs = gql`
   extend type Mutation {
     createDiscordUser(discordUserId: String!): DiscordUser!
-    associateAccount(userId: UUID!, username: String!): Void
-  }
-
-  input UpdateDiscordUserInput {
-    username: UUID
+    associateDiscordAccount(userId: UUID!, username: String!): Void
+    associateIrcAccount(discordUserId: UUID!, nick: String!): Void
   }
 
   type DiscordUser {
@@ -37,15 +34,14 @@ exports.resolvers = {
         .then(([apiRes, dbRecord]) => discordUserResolver(dbRecord, apiRes));
     },
 
-    async associateAccount(root, { userId, username }, { dataSources }) {
-      const [apiRes, dbUser] = await Promise.all([
-        dataSources.discord.getUser(username),
-        dataSources.db.knex('users').where('id', userId).first(),
-      ]);
-      if (!apiRes) throw new ValidationError('Discord user does not exist.');
-      if (!dbUser) throw new ValidationError('User does not exist in the database.');
+    async associateIrcAccount(root, { discordUserId, nick }, { dataSources }) {
+      const { id: userId } = await dataSources.db.knex('users')
+        .select('id')
+        .where('nick', nick)
+        .first();
+
       await dataSources.db.knex('discordUsers')
-        .where('id', apiRes.id)
+        .where('id', discordUserId)
         .update('userId', userId);
     },
   },
