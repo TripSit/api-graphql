@@ -1,16 +1,16 @@
 'use strict';
 
-const { gql } = require('apollo-server');
+const { gql, ValidationError } = require('apollo-server');
 const discordUserResolver = require('./resolvers/discord-user');
 
 exports.typeDefs = gql`
   extend type Mutation {
     createDiscordUser(discordUserId: String!): DiscordUser!
-    updateDiscordUser(discordUserId: String!, input: UpdateDiscordUserInput!): DiscordUser!
+    associateAccount(userId: UUID!, username: String!): Void
   }
 
   input UpdateDiscordUserInput {
-    userId: UUID
+    username: UUID
   }
 
   type DiscordUser {
@@ -28,7 +28,7 @@ exports.resolvers = {
   Mutation: {
     async createDiscordUser(root, { discordUserId }, { dataSources }) {
       return Promise.all([
-        dataSources.discord.getUserById(discordUserId),
+        dataSources.discord.getUser({ id: discordUserId }),
         dataSources.db.knex('discordUsers')
           .insert({ id: discordUserId })
           .returning('*')
@@ -37,17 +37,16 @@ exports.resolvers = {
         .then(([apiRes, dbRecord]) => discordUserResolver(dbRecord, apiRes));
     },
 
-    async updateDiscordUser(root, { discordUserId, input }, { dataSources }) {
-      return Promise.all([
-        dataSources.discord.getUserById(discordUserId),
-        dataSources.db.knex.transacting(async trx => {
-          const updateQuery = trx('discordUsers').where('id', discordUserId);
-          if (input.userId) updateQuery.update('userId', input.userId);
-          await updateQuery;
-          return trx('discordUsers').where('id', discordUserId).first();
-        }),
-      ])
-        .then(([apiRes, dbRecord]) => discordUserResolver(dbRecord, apiRes));
+    async associateAccount(root, { userId, username }, { dataSources }) {
+      const [apiRes, dbUser] = await Promise.all([
+        dataSources.discord.getUser(username),
+        dataSources.db.knex('users').where('id', userId).first(),
+      ]);
+      if (!apiRes) throw new ValidationError('Discord user does not exist.');
+      if (!dbUser) throw new ValidationError('User does not exist in the database.');
+      await dataSources.db.knex('discordUsers')
+        .where('id', apiRes.id)
+        .update('userId', userId);
     },
   },
 

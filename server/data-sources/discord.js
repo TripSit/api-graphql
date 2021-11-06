@@ -22,7 +22,10 @@ module.exports = class Discord extends DataSource {
     });
   }
 
-  async getUserById(discordUserId) {
-    return this.client.users.fetch(discordUserId).then(fromUser);
+  async getUser(query) {
+    const user = /^.{3,32}#[0-9]{4}$/.test(query)
+      ? this.client.users.cache(a => a.tag === query)
+      : this.client.users.fetch(query);
+    return fromUser(user);
   }
 };
