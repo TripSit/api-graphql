@@ -6,6 +6,7 @@ const scalarSchema = require('./scalar');
 const userSchema = require('./user');
 const userNoteSchema = require('./user-note');
 const discordAccountSchema = require('./discord-account');
+const alertSchema = require('./alert');
 
 const baseTypeDefs = gql`
   type Query {
@@ -25,21 +26,24 @@ module.exports = function createSchema() {
       userSchema.typeDefs,
       userNoteSchema.typeDefs,
       discordAccountSchema.typeDefs,
+      alertSchema.typeDefs,
     ],
     resolvers: {
       ...scalarSchema.resolvers,
       ...userSchema.resolvers,
       ...userNoteSchema.resolvers,
-      ...discordAccountSchema.resolvers,
+      ...alertSchema.resolvers,
       Query: {
         ...userSchema.resolvers.Query,
         ...userNoteSchema.resolvers.Query,
-        ...discordAccountSchema.resolvers.Query,
+        ...alertSchema.resolvers.Query,
+        ...discordAccountSchema.resolvers,
       },
       Mutation: {
         ...userSchema.resolvers.Mutation,
         ...userNoteSchema.resolvers.Mutation,
-        ...discordAccountSchema.resolvers.Mutation,
+        ...discordAccountSchema.resolvers,
+        ...alertSchema.resolvers.Mutation,
       },
     },
   });

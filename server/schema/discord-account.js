@@ -26,7 +26,7 @@ exports.typeDefs = gql`
 
 exports.resolvers = {
   Mutation: {
-    async createDiscordUser(root, { discordAccountId }, { dataSources }) {
+    async createDiscordAccount(root, { discordAccountId }, { dataSources }) {
       return Promise.all([
         dataSources.discord.getUser({ id: discordAccountId }),
         dataSources.db.knex('discordAccounts')
@@ -46,9 +46,9 @@ exports.resolvers = {
   },
 
   DiscordAccount: {
-    async user(discordUser, params, { dataSources }) {
-      return discordUser.userId && dataSources.db.knex('users')
-        .where('id', discordUser.userId)
+    async user(discordAccount, params, { dataSources }) {
+      return discordAccount.userId && dataSources.db.knex('users')
+        .where('id', discordAccount.userId)
         .first();
     },
   },

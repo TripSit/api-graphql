@@ -36,6 +36,16 @@ exports.up = async function up(knex) {
         .defaultTo('USER');
 
       table
+        .boolean('alertTripsit')
+        .notNullable()
+        .defaultTo(false);
+
+      table
+        .boolean('alertSanctuary')
+        .notNullable()
+        .defaultTo(false);
+
+      table
         .timestamp('createdAt')
         .notNullable()
         .defaultTo(knex.fn.now());
@@ -101,11 +111,41 @@ exports.up = async function up(knex) {
         .timestamp('createdAt')
         .notNullable()
         .defaultTo(knex.fn.now());
+    })
+    .createTable('alerts', table => {
+      table
+        .uuid('id')
+        .notNullable()
+        .defaultTo(knex.raw('uuid_generate_v4()'))
+        .primary();
+
+      table
+        .uuid('requestingUserId')
+        .notNullable()
+        .references('id')
+        .inTable('users');
+
+      table
+        .enum('type', [
+          'TRIPSIT',
+          'SANCTUARY',
+        ], {
+          useNative: true,
+          enumName: 'alert_type',
+        });
+
+      table.text('text');
+
+      table
+        .timestamp('createdAt')
+        .notNullable()
+        .defaultTo(knex.fn.now());
     });
 };
 
 exports.down = async function down(knex) {
   await knex.schema
+    .dropTableIfExists('alerts')
     .dropTableIfExists('discordUsers')
     .dropTableIfExists('userNotes')
     .dropTableIfExists('users');
