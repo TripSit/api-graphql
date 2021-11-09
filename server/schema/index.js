@@ -8,6 +8,7 @@ const userNoteSchema = require('./user-note');
 const discordAccountSchema = require('./discord-account');
 const alertSchema = require('./alert');
 const drugSchema = require('./drug');
+const drugNameSchema = require('./drug-name');
 
 const baseTypeDefs = gql`
   type Query {
@@ -20,37 +21,31 @@ const baseTypeDefs = gql`
 `;
 
 module.exports = function createSchema() {
-  return makeExecutableSchema({
-    typeDefs: [
-      baseTypeDefs,
-      scalarSchema.typeDefs,
-      userSchema.typeDefs,
-      userNoteSchema.typeDefs,
-      discordAccountSchema.typeDefs,
-      alertSchema.typeDefs,
-      drugSchema.typeDefs,
-    ],
-    resolvers: {
-      ...scalarSchema.resolvers,
-      ...userSchema.resolvers,
-      ...userNoteSchema.resolvers,
-      ...alertSchema.resolvers,
-      ...discordAccountSchema.resolvers,
-      ...drugSchema.resolvers,
-      Query: {
-        ...userSchema.resolvers.Query,
-        ...userNoteSchema.resolvers.Query,
-        ...alertSchema.resolvers.Query,
-        ...discordAccountSchema.resolvers.Query,
-        ...drugSchema.resolvers.Query,
+  return makeExecutableSchema([
+    scalarSchema,
+    userSchema,
+    userNoteSchema,
+    discordAccountSchema,
+    alertSchema,
+    drugSchema,
+    drugNameSchema,
+  ]
+    .reduce((acc, schema) => ({
+      typeDefs: acc.typeDefs.concat(schema.typeDefs),
+      resolvers: {
+        ...acc.resolvers,
+        ...schema.resolvers,
+        Query: {
+          ...acc.resolvers.Query,
+          ...schema.resolvers.Query,
+        },
+        Mutation: {
+          ...acc.resolvers.Mutation,
+          ...schema.resolvers.Mutation,
+        },
       },
-      Mutation: {
-        ...userSchema.resolvers.Mutation,
-        ...userNoteSchema.resolvers.Mutation,
-        ...discordAccountSchema.resolvers,
-        ...alertSchema.resolvers.Mutation,
-        ...drugSchema.resolvers.Mutation,
-      },
-    },
-  });
+    }), {
+      typeDefs: [baseTypeDefs],
+      resolvers: [],
+    }));
 };

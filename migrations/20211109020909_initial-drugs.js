@@ -10,6 +10,19 @@ exports.up = async function up(knex) {
         .primary();
 
       table.text('summary');
+
+      table.enum('psychoactiveClass', [
+        'PSYCHEDELIC',
+        'STIMULANT',
+        'EMPATHOGEN',
+        'DEPRESSANT',
+        'DISSOCIATIVE',
+      ], {
+        useNative: true,
+        enumName: 'drug_psychoactive_class',
+      });
+
+      table.text('chemicalClass');
       table.text('psychonautwikiSlug');
       table.text('errowidExperiencesUrl');
 
@@ -32,6 +45,18 @@ exports.up = async function up(knex) {
         .inTable('drugs');
 
       table.text('name').notNullable();
+
+      table
+        .enum('type', [
+          'COMMON',
+          'SUBSTITUTIVE',
+          'SYSTEMATIC',
+        ], {
+          useNative: true,
+          enumName: 'drug_name_type',
+        })
+        .notNullable()
+        .defaultTo('COMMON');
 
       table
         .boolean('primary')
@@ -108,5 +133,7 @@ exports.down = async function down(knex) {
     .dropTableIfExists('drugNames')
     .dropTableIfExists('drugs');
 
+  await knex.raw('DROP TYPE IF EXISTS "drug_name_type"');
   await knex.raw('DROP TYPE IF EXISTS "drug_roa"');
+  await knex.raw('DROP TYPE IF EXISTS "drug_psychoactive_class"');
 };

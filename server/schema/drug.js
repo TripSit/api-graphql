@@ -4,13 +4,13 @@ const { gql } = require('apollo-server');
 
 exports.typeDefs = gql`
   extend type Query {
-    drugById(drugId: UUID!): Drug!
-    drugsByName(drugName: String!): [Drug!]!
+    drugs: [Drug!]!
   }
 
   extend type Mutation {
     createDrug(drug: CreateDrugInput!): Drug!
     updateDrug(drugId: UUID!, updates: UpdateDrugInput!): Drug!
+    removeDrug(drugId: UUID!): Void
   }
 
   input CreateDrugInput {
@@ -38,17 +38,8 @@ exports.typeDefs = gql`
 
 exports.resolvers = {
   Query: {
-    async drugById(root, { drugId }, { dataSources }) {
-      return dataSources.db.knex('drugs')
-        .where('id', drugId)
-        .first();
-    },
-
-    async drugs(root, { drugName }, { dataSources }) {
-      return dataSources.db.knex('drugNames')
-        .innerJoin('drugs', 'drugs.id', 'drugNames.drugId')
-        .select('drugs.*')
-        .where(dataSources.db.knex.raw('LOWER("nick") = ?', drugName.toLowerCase()));
+    async drugs(root, params, { dataSources }) {
+      return dataSources.db.knex('drugs');
     },
   },
 
@@ -82,6 +73,12 @@ exports.resolvers = {
         await trx('drugs').where('id', drugId).updates(updates);
         return trx('drugs').where('id', drugId).first();
       });
+    },
+
+    async removeDrug(root, { drugId }, { dataSources }) {
+      return dataSources.db.knex('drugs')
+        .where('id', drugId)
+        .del();
     },
   },
 
