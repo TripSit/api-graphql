@@ -95,7 +95,7 @@ exports.up = async function up(knex) {
         .notNullable()
         .defaultTo(knex.fn.now());
     })
-    .createTable('discordUsers', table => {
+    .createTable('discordAccounts', table => {
       table
         .specificType('id', 'CHAR(18)')
         .notNullable()
@@ -146,7 +146,7 @@ exports.up = async function up(knex) {
 exports.down = async function down(knex) {
   await knex.schema
     .dropTableIfExists('alerts')
-    .dropTableIfExists('discordUsers')
+    .dropTableIfExists('discordAccounts')
     .dropTableIfExists('userNotes')
     .dropTableIfExists('users');
   await knex.raw('DROP TYPE IF EXISTS "user_access_level"');
