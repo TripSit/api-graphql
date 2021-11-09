@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = function discordUserResolver(dbRecord, apiRes) {
+module.exports = function discordAccountResolver(dbRecord, apiRes) {
   return {
     id: dbRecord.id,
     userId: dbRecord.userId,

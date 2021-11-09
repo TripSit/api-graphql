@@ -2,7 +2,7 @@
 
 const { gql, AuthenticationError } = require('apollo-server');
 const argon = require('argon2');
-const discordUserResolver = require('./resolvers/discord-user');
+const discordUserResolver = require('./resolvers/discord-account');
 
 exports.typeDefs = gql`
   extend type Query {

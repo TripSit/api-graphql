@@ -3,7 +3,7 @@
 module.exports = {
   root: true,
   extends: ['airbnb-base'],
-  parser: 'babel-eslint',
+  parser: '@babel/eslint-parser',
   parserOptions: {
     sourceType: 'script',
   },
@@ -19,21 +19,9 @@ module.exports = {
   overrides: [
     {
       files: ['**/__tests__/*.test.js', './tests/**/*.spec.js', 'jest.setup.js'],
-      extends: [
-        'airbnb-base',
-        'plugin:jest/recommended',
-      ],
+      plugins: ['jest'],
       env: {
-        'jest/globals': true,
-      },
-      parserOptions: {
-        sourceType: 'script',
-      },
-      rules: {
-        strict: [2, 'global'],
-        'no-console': [2, { allow: ['error', 'warn', 'info'] }],
-        'arrow-parens': [2, 'as-needed'],
-        'import/no-extraneous-dependencies': 0,
+        jest: true,
       },
     },
   ],

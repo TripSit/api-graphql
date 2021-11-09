@@ -5,7 +5,7 @@ const { makeExecutableSchema } = require('@graphql-tools/schema');
 const scalarSchema = require('./scalar');
 const userSchema = require('./user');
 const userNoteSchema = require('./user-note');
-const discordUserSchema = require('./discord-user');
+const discordAccountSchema = require('./discord-account');
 
 const baseTypeDefs = gql`
   type Query {
@@ -24,22 +24,22 @@ module.exports = function createSchema() {
       scalarSchema.typeDefs,
       userSchema.typeDefs,
       userNoteSchema.typeDefs,
-      discordUserSchema.typeDefs,
+      discordAccountSchema.typeDefs,
     ],
     resolvers: {
       ...scalarSchema.resolvers,
       ...userSchema.resolvers,
       ...userNoteSchema.resolvers,
-      ...discordUserSchema.resolvers,
+      ...discordAccountSchema.resolvers,
       Query: {
         ...userSchema.resolvers.Query,
         ...userNoteSchema.resolvers.Query,
-        ...discordUserSchema.resolvers.Query,
+        ...discordAccountSchema.resolvers.Query,
       },
       Mutation: {
         ...userSchema.resolvers.Mutation,
         ...userNoteSchema.resolvers.Mutation,
-        ...discordUserSchema.resolvers.Mutation,
+        ...discordAccountSchema.resolvers.Mutation,
       },
     },
   });
