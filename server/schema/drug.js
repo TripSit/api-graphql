@@ -28,11 +28,22 @@ exports.typeDefs = gql`
 
   type Drug {
     id: ID!
+    displayName: String!
     names: [DrugName!]!
+    roas: [DrugRoa!]!
     summary: String
+    psychoactiveClass: PsychoactiveDrugClass
     psychonautwikiSlug: String
     errowidExperiencesUrl: String
     createdAt: DateTime!
+  }
+
+  enum PsychoactiveDrugClass {
+    PSYCHEDELIC
+    STIMULANT
+    EMPATHOGEN
+    DEPRESSANT
+    DISSOCIATIVE
   }
 `;
 
@@ -83,11 +94,24 @@ exports.resolvers = {
   },
 
   Drug: {
+    async displayName(drug, params, { dataSources }) {
+      return dataSources.db.knex('drugNames')
+        .select('name')
+        .where('drugId', drug.id)
+        .where('primary', true)
+        .first()
+        .then(({ name }) => name);
+    },
+
     async names(drug, params, { dataSources }) {
       return dataSources.db.knex('drugNames')
         .where('drugId', drug.id)
         .orderBy('primary')
         .orderBy('name');
+    },
+
+    async roas(drug, params, { dataSources }) {
+      return dataSources.db.knex('drugRoas').where('drugId', drug.id);
     },
   },
 };

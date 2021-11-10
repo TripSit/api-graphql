@@ -12,8 +12,15 @@ exports.typeDefs = gql`
     id: ID!
     drug: Drug!
     name: String!
+    type: DrugNameType!
     primary: Boolean!
     createdAt: DateTime!
+  }
+
+  enum DrugNameType {
+    COMMON
+    SUBSTITUTIVE
+    SYSTEMATIC
   }
 `;
 

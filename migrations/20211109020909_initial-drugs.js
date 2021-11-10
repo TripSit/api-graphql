@@ -83,17 +83,17 @@ exports.up = async function up(knex) {
 
       table
         .enum('route', [
-          'oral',
-          'insufflated',
-          'inhaled',
-          'topical',
-          'sublingual',
-          'buccal',
-          'rectal',
-          'intramuscular',
-          'intravenous',
-          'subcutanious',
-          'transdermal',
+          'ORAL',
+          'INSUFFLATED',
+          'INHALED',
+          'TOPICAL',
+          'SUBLINGUAL',
+          'BUCCAL',
+          'RECTAL',
+          'INTRAMUSCULAR',
+          'INTRAVENOUS',
+          'SUBCUTANIOUS',
+          'TRANSDERMAL',
         ], {
           useNative: true,
           enumName: 'drug_roa',
@@ -117,8 +117,8 @@ exports.up = async function up(knex) {
       table.float('durationPeakMax');
       table.float('durationOffsetMin');
       table.float('durationOffsetMax');
-      table.float('durationAfter_effectsMin');
-      table.float('durationAfter_effectsMax');
+      table.float('durationAfterEffectsMin');
+      table.float('durationAfterEffectsMax');
 
       table
         .timestamp('createdAt')
