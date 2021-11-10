@@ -42,7 +42,8 @@ exports.up = async function up(knex) {
         .uuid('drugId')
         .notNullable()
         .references('id')
-        .inTable('drugs');
+        .inTable('drugs')
+        .onDelete('CASCADE');
 
       table.text('name').notNullable();
 
@@ -79,7 +80,8 @@ exports.up = async function up(knex) {
         .uuid('drugId')
         .notNullable()
         .references('id')
-        .inTable('drugs');
+        .inTable('drugs')
+        .onDelete('CASCADE');
 
       table
         .enum('route', [

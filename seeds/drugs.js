@@ -144,7 +144,7 @@ exports.seed = async function seed(knex) {
     }))
     .map(roa => ({
       drugId: drug.id,
-      route: routeMap[roa.route] || roa.route,
+      route: (routeMap[roa.route] || roa.route).toUpperCase(),
 
       doseThreshold: parseDose('threshold', roa.dosage),
       doseLight: parseDose('light', roa.dosage),
