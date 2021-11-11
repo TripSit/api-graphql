@@ -3,9 +3,19 @@
 const { gql } = require('apollo-server');
 
 exports.typeDefs = gql`
+  extend type Mutation {
+    createDrugRoa(drugVariantId: UUID!, route: DrugRouteType!): DrugRoa!
+    updateDrugRoa(drugRoaId: UUID!, updates: UpdateDrugRoaInput!): DrugRoa!
+    removeDrugRoa(drugRoaId: UUID!): Void
+  }
+
+  input UpdateDrugRoaInput {
+    doseThreshold: UnsignedFloat
+  }
+
   type DrugRoa {
     id: ID!
-    drug: Drug!
+    variant: DrugVariant!
     route: DrugRouteType!
 
     doseThreshold: UnsignedFloat
@@ -47,9 +57,29 @@ exports.typeDefs = gql`
 `;
 
 exports.resolvers = {
+  Mutation: {
+    async createDrugRoa(root, params, { dataSources }) {
+      return dataSources.db.knex('drugRoas')
+        .insert(params)
+        .returning('*')
+        .then(([a]) => a);
+    },
+
+    async updateDrugRoa(root, { drugRoaId, updates }, { dataSources }) {
+      return dataSources.db.knex.transacting(async trx => {
+        await trx('drugRoas').where('id', drugRoaId).update(updates);
+        return trx('drugRoas').where('id', drugRoaId).first();
+      });
+    },
+
+    async removeDrugRoa(root, { drugRoaId }, { dataSources }) {
+      return dataSources.db.knex('drugRoas').where('id', drugRoaId).del();
+    },
+  },
+
   DrugRoa: {
-    async drug(roa, params, { dataSources }) {
-      return dataSources.db.knex('drugs').where('id', roa.drugId).first();
+    async variant(roa, params, { dataSources }) {
+      return dataSources.db.knex('drugs').where('id', roa.drugVariantId).first();
     },
   },
 };

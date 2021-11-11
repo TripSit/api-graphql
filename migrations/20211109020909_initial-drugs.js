@@ -69,7 +69,7 @@ exports.up = async function up(knex) {
         .notNullable()
         .defaultTo(knex.fn.now());
     })
-    .createTable('drugRoas', table => {
+    .createTable('drugVariants', table => {
       table
         .uuid('id')
         .notNullable()
@@ -81,6 +81,29 @@ exports.up = async function up(knex) {
         .notNullable()
         .references('id')
         .inTable('drugs')
+        .onDelete('CASCADE');
+
+      table.text('name').notNullable();
+      table.float('waterSolubilityPercentage').unsigned();
+      table.float('lipidSolubilityPercentage').unsigned();
+
+      table
+        .timestamp('createdAt')
+        .notNullable()
+        .defaultTo(knex.fn.now());
+    })
+    .createTable('drugRoas', table => {
+      table
+        .uuid('id')
+        .notNullable()
+        .defaultTo(knex.raw('uuid_generate_v4()'))
+        .primary();
+
+      table
+        .uuid('drugVariantId')
+        .notNullable()
+        .references('id')
+        .inTable('drugVariants')
         .onDelete('CASCADE');
 
       table
@@ -132,6 +155,7 @@ exports.up = async function up(knex) {
 exports.down = async function down(knex) {
   await knex.schema
     .dropTableIfExists('drugRoas')
+    .dropTableIfExists('drugVariants')
     .dropTableIfExists('drugNames')
     .dropTableIfExists('drugs');
 

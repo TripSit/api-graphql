@@ -9,7 +9,8 @@
     "dev": "NODE_ENV=development nodemon --inspect ./index.js",
     "test": "npm run lint && npm run test:unit",
     "lint": "eslint .",
-    "test:unit": "NODE_ENV=test jest -i"
+    "test:unit": "NODE_ENV=test jest -i",
+    "clean": "./scripts/clean.sh"
   },
   "author": "SevenCats <sevencats@tripsit.me>",
   "license": "MIT",

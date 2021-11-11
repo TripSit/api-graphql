@@ -9,6 +9,7 @@ const discordAccountSchema = require('./discord-account');
 const alertSchema = require('./alert');
 const drugSchema = require('./drug');
 const drugNameSchema = require('./drug-name');
+const drugVariantSchema = require('./drug-variant');
 const drugRoaSchema = require('./drug-roa');
 
 const baseTypeDefs = gql`
@@ -30,6 +31,7 @@ module.exports = function createSchema() {
     alertSchema,
     drugSchema,
     drugNameSchema,
+    drugVariantSchema,
     drugRoaSchema,
   ]
     .reduce((acc, schema) => ({

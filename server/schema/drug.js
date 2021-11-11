@@ -30,7 +30,7 @@ exports.typeDefs = gql`
     id: ID!
     displayName: String!
     names: [DrugName!]!
-    roas: [DrugRoa!]!
+    variants: [DrugVariant!]!
     summary: String
     psychoactiveClass: PsychoactiveDrugClass
     psychonautwikiSlug: String
@@ -110,8 +110,8 @@ exports.resolvers = {
         .orderBy('name');
     },
 
-    async roas(drug, params, { dataSources }) {
-      return dataSources.db.knex('drugRoas').where('drugId', drug.id);
+    async variants(drug, params, { dataSources }) {
+      return dataSources.db.knex('drugVariants').where('drugId', drug.id);
     },
   },
 };
