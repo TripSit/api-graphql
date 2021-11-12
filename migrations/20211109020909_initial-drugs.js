@@ -10,19 +10,6 @@ exports.up = async function up(knex) {
         .primary();
 
       table.text('summary');
-
-      table.enum('psychoactiveClass', [
-        'PSYCHEDELIC',
-        'STIMULANT',
-        'EMPATHOGEN',
-        'DEPRESSANT',
-        'DISSOCIATIVE',
-      ], {
-        useNative: true,
-        enumName: 'drug_psychoactive_class',
-      });
-
-      table.text('chemicalClass');
       table.text('psychonautwikiSlug');
       table.text('errowidExperiencesUrl');
 
@@ -83,9 +70,12 @@ exports.up = async function up(knex) {
         .inTable('drugs')
         .onDelete('CASCADE');
 
-      table.text('name').notNullable();
-      table.float('waterSolubilityPercentage').unsigned();
-      table.float('lipidSolubilityPercentage').unsigned();
+      table.text('name');
+
+      table
+        .boolean('isDefault')
+        .notNullable()
+        .defaultTo(false);
 
       table
         .timestamp('createdAt')

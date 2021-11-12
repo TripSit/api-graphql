@@ -149,6 +149,7 @@ exports.down = async function down(knex) {
     .dropTableIfExists('discordAccounts')
     .dropTableIfExists('userNotes')
     .dropTableIfExists('users');
+  await knex.raw('DROP TYPE IF EXISTS "alert_type"');
   await knex.raw('DROP TYPE IF EXISTS "user_access_level"');
   await knex.raw('DROP TYPE IF EXISTS "user_note_type"');
   await knex.raw('DROP EXTENSION IF EXISTS "uuid-ossp"');

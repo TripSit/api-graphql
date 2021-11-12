@@ -110,6 +110,7 @@ function parseDuration(name, range, durations) {
 
 exports.seed = async function seed(knex) {
   await knex('drugRoas').del();
+  await knex('drugVariants').del();
   await knex('drugNames').del();
   await knex('drugs').del();
 
@@ -137,13 +138,20 @@ exports.seed = async function seed(knex) {
       primary: true,
     })));
 
+  const variantRecords = await knex('drugVariants')
+    .insert(drugRecords.map(drug => ({
+      drugId: drug.id,
+      isDefault: true,
+    })))
+    .returning('*');
+
   return knex('drugRoas').insert(drugRecords.flatMap(drug => drug.roas
     .map(({ name, ...roa }) => ({
       ...roa,
       route: name.toLowerCase().replace(/:$/, ''),
     }))
     .map(roa => ({
-      drugId: drug.id,
+      drugVariantId: variantRecords.find(variant => variant.drugId === drug.id).id,
       route: (routeMap[roa.route] || roa.route).toUpperCase(),
 
       doseThreshold: parseDose('threshold', roa.dosage),
