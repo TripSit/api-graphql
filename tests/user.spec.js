@@ -1,13 +1,11 @@
 'use strict';
 
 const { gql } = require('apollo-server');
-const { knex } = require('./utils');
+const knex = require('knex');
 const createLogger = require('../logger');
 const createServer = require('../server');
 
-beforeAll(async () => {})
-
-describe('Mutations', () => {
+describe.skip('Mutations', () => {
   describe('createUser', () => {
     test('Can create a user', async () => {
       const server = createServer({

@@ -46,6 +46,11 @@ exports.up = async function up(knex) {
         .defaultTo(false);
 
       table
+        .uuid('createdBy')
+        .references('id')
+        .inTable('users');
+
+      table
         .timestamp('createdAt')
         .notNullable()
         .defaultTo(knex.fn.now());

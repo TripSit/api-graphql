@@ -2,13 +2,14 @@
 
 const { ApolloServer } = require('apollo-server');
 const responseCachePlugin = require('apollo-server-plugin-response-cache').default;
-const dataSources = require('./data-sources');
 const createSchema = require('./schema');
+const dataSources = require('./data-sources');
+const createLogger = require('../logger');
 const { NODE_ENV } = require('../env');
 
-module.exports = function createServer({ logger }) {
+module.exports = function createServer(logger = createLogger()) {
   return new ApolloServer({
-    dataSources: () => dataSources({ logger }),
+    dataSources,
     connectToDevTools: NODE_ENV !== 'production',
     schema: createSchema(),
     plugins: [responseCachePlugin()],

@@ -59,8 +59,7 @@ exports.resolvers = {
     },
 
     async roas(variant, params, { dataSources }) {
-      return dataSources.db.knex('drugRoas')
-        .where('id', variant.roaId);
+      return dataSources.db.knex('drugRoas').where('drugVariantId', variant.id);
     },
   },
 };

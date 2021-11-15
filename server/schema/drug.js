@@ -16,13 +16,13 @@ exports.typeDefs = gql`
   input CreateDrugInput {
     name: String!
     summary: String
-    psychonautWikiSlug: String
+    psychonautwikiSlug: String
     errowidExperiencesUrl: String
   }
 
   input UpdateDrugInput {
     summary: String
-    psychonautWikiSlug: String
+    psychonautwikiSlug: String
     errowidExperiencesUrl: String
   }
 
@@ -32,7 +32,6 @@ exports.typeDefs = gql`
     names: [DrugName!]!
     variants: [DrugVariant!]!
     summary: String
-    psychoactiveClass: PsychoactiveDrugClass
     psychonautwikiSlug: String
     errowidExperiencesUrl: String
     createdAt: DateTime!
@@ -57,7 +56,7 @@ exports.resolvers = {
   Mutation: {
     async createDrug(root, { drug }, { dataSources }) {
       const { name, ...rest } = drug;
-      return dataSources.db.knex.transacting(async trx => {
+      return dataSources.db.knex.transaction(async trx => {
         const newDrug = await trx('drugs')
           .insert(rest)
           .returning('*')
@@ -69,7 +68,7 @@ exports.resolvers = {
             drugId: newDrug.id,
             primary: true,
           })
-          .return('*')
+          .returning('*')
           .then(([a]) => a);
 
         return {
