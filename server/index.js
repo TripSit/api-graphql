@@ -7,15 +7,15 @@ const dataSources = require('./data-sources');
 const createLogger = require('../logger');
 const { NODE_ENV } = require('../env');
 
-module.exports = function createServer(logger = createLogger()) {
+module.exports = function createServer(deps) {
   return new ApolloServer({
-    dataSources,
+    dataSources: () => dataSources(deps),
     connectToDevTools: NODE_ENV !== 'production',
     schema: createSchema(),
     plugins: [responseCachePlugin()],
     context() {
       return {
-        logger,
+        logger: deps.logger,
       };
     },
   });

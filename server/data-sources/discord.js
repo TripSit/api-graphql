@@ -11,14 +11,16 @@ function fromUser({ createdAt, ...user }) {
 }
 
 module.exports = class Discord extends DataSource {
-  constructor({ logger }) {
-    super();
-    this.logger = logger;
+  constructor(...args) {
+    super(...args);
     this.client = new Client({
       intents: [Intents.FLAGS.GUILDS],
     });
+  }
+
+  initialize({ context }) {
     this.client.once('ready', () => {
-      this.logger.info('Discord client is running...');
+      context.logger.info('Discord client is running...');
     });
   }
 

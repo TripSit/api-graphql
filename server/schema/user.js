@@ -58,12 +58,12 @@ exports.resolvers = {
   Query: {
     async users(root, { input }, { dataSources }) {
       const sqlQuery = dataSources.db.knex('users');
-      if (input.id) sqlQuery.where('id', input.id);
-      if (input.nick) {
+      if (input?.id) sqlQuery.where('id', input.id);
+      if (input?.nick) {
         sqlQuery.where(dataSources.db.knex.raw('LOWER("nick") = ?', input.nick.toLowerCase()));
       }
-      if (input.alertTripsit) sqlQuery.update('alertTripsit', input.alertTripsit);
-      if (input.alertSanctuary) sqlQuery.update('alertSanctuary', input.alertSanctuary);
+      if (input?.alertTripsit) sqlQuery.update('alertTripsit', input.alertTripsit);
+      if (input?.alertSanctuary) sqlQuery.update('alertSanctuary', input.alertSanctuary);
       return sqlQuery;
     },
 

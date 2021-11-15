@@ -107,6 +107,12 @@ exports.up = async function up(knex) {
         .primary();
 
       table
+        .uuid('userId')
+        .notNullable()
+        .references('id')
+        .inTable('users');
+
+      table
         .uuid('createdBy')
         .notNullable()
         .references('id')
