@@ -17,7 +17,7 @@ exports.typeDefs = gql`
     name: String!
     summary: String
     psychonautwikiSlug: String
-    errowidExperiencesUrl: String
+    erowidExperiencesUrl: String
   }
 
   input UpdateDrugInput {

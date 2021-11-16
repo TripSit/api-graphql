@@ -23,9 +23,6 @@ module.exports = {
       env: {
         jest: true,
       },
-      global: {
-        knex: true,
-      },
     },
   ],
 };

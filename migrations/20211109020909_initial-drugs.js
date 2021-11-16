@@ -11,7 +11,7 @@ exports.up = async function up(knex) {
 
       table.text('summary');
       table.text('psychonautwikiSlug');
-      table.text('errowidExperiencesUrl');
+      table.text('erowidExperiencesUrl');
 
       table
         .timestamp('createdAt')
