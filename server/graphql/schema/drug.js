@@ -1,23 +1,17 @@
 'use strict';
 
-const { gql } = require('apollo-server');
+const { gql } = require('apollo-server-core');
 
 exports.typeDefs = gql`
   extend type Query {
+    drug(drugId: UUID!): Drug!
     drugs: [Drug!]!
   }
 
   extend type Mutation {
-    createDrug(drug: CreateDrugInput!): Drug!
+    createDrug(displayName: String!): Drug!
     updateDrug(drugId: UUID!, updates: UpdateDrugInput!): Drug!
     removeDrug(drugId: UUID!): Void
-  }
-
-  input CreateDrugInput {
-    name: String!
-    summary: String
-    psychonautwikiSlug: String
-    erowidExperiencesUrl: String
   }
 
   input UpdateDrugInput {
@@ -48,6 +42,10 @@ exports.typeDefs = gql`
 
 exports.resolvers = {
   Query: {
+    async drug(root, { drugId }, { dataSources }) {
+      return dataSources.db.knex('drugs').where('id', drugId).first();
+    },
+
     async drugs(root, params, { dataSources }) {
       return dataSources.db.knex('drugs');
     },

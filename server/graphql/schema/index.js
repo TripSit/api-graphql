@@ -1,6 +1,6 @@
 'use strict';
 
-const { gql } = require('apollo-server');
+const { gql } = require('apollo-server-core');
 const { makeExecutableSchema } = require('@graphql-tools/schema');
 const scalarSchema = require('./scalar');
 const userSchema = require('./user');

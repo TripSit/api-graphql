@@ -1,6 +1,6 @@
 'use strict';
 
-const { gql, ValidationError } = require('apollo-server');
+const { gql, ValidationError } = require('apollo-server-core');
 
 exports.typeDefs = gql`
   extend type Mutation {

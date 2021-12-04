@@ -1,6 +1,6 @@
 'use strict';
 
-const { gql, AuthenticationError } = require('apollo-server');
+const { gql, AuthenticationError } = require('apollo-server-core');
 const argon = require('argon2');
 const discordAccountResolver = require('./resolvers/discord-account');
 

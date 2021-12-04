@@ -1,6 +1,6 @@
 'use strict';
 
-const { gql } = require('apollo-server');
+const { gql } = require('apollo-server-core');
 
 exports.typeDefs = gql`
   extend type Query {

@@ -1,22 +1,20 @@
 'use strict';
 
-const { ApolloServer } = require('apollo-server');
-const responseCachePlugin = require('apollo-server-plugin-response-cache').default;
-const createSchema = require('./schema');
-const dataSources = require('./data-sources');
-const createLogger = require('../logger');
-const { NODE_ENV } = require('../env');
+const express = require('express');
+const helmet = require('helmet');
+const createGraphQlEndpoint = require('./graphql');
 
-module.exports = function createServer(deps) {
-  return new ApolloServer({
-    dataSources: () => dataSources(deps),
-    connectToDevTools: NODE_ENV !== 'production',
-    schema: createSchema(),
-    plugins: [responseCachePlugin()],
-    context() {
-      return {
-        logger: deps.logger,
-      };
-    },
+module.exports = async function createServer(deps) {
+  const { logger } = deps;
+  const app = express();
+  app.use(helmet());
+  await createGraphQlEndpoint(app, deps);
+
+  app.use((ex, req, res, next) => {
+    logger.error(ex);
+    if (res.headersSent) next(ex);
+    else res.sendStatus(500);
   });
+
+  return app;
 };
