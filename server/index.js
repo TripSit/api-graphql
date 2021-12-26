@@ -18,6 +18,8 @@ module.exports = async function createServer(deps) {
   app.use(session({
     secret: SESSION_SECRET,
     store: new KnexSessionStore({ knex }),
+    resave: true,
+    saveUninitialized: true,
     cookie: {
       maxAge: SESSION_MAX_AGE,
       httpOnly: true,

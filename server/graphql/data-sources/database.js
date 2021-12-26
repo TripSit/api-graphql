@@ -1,5 +1,10 @@
 'use strict';
 
-const { SQLDataSource } = require('datasource-sql');
+const { DataSource } = require('apollo-datasource');
 
-module.exports = class Database extends SQLDataSource {};
+module.exports = class Database extends DataSource {
+  constructor(knex, ...args) {
+    super(knex, ...args);
+    this.knex = knex;
+  }
+};

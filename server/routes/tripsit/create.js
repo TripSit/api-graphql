@@ -8,12 +8,16 @@ module.exports = function applyCreateTripsit(router, { validator, knex }) {
     '/tripsit',
 
     validator.body(Joi.object({
-      targetUserId: joiValidators.required(),
-      initiatorUserId: joiValidators.required(),
+      targetUserId: joiValidators.discordId.required(),
+      initiatorUserId: joiValidators.discordId.required(),
     }).required()),
 
     async (req, res) => {
-      await knex('tripsits');
+      const tripsit = await knex('tripsits')
+        .insert(req.body)
+        .returning('*')
+        .then(([a]) => a);
+      res.status(201).json({ tripsit });
     },
   );
 };

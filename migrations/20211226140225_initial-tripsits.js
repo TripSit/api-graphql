@@ -22,6 +22,11 @@ exports.up = async function up(knex) {
         .inTable('discordAccounts');
 
       table
+        .boolean('isUrgent')
+        .notNullable()
+        .defaultTo(false);
+
+      table
         .timestamp('updatedAt')
         .notNullable()
         .defaultTo(knex.fn.now());

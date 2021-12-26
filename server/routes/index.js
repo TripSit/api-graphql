@@ -3,7 +3,8 @@
 const express = require('express');
 const Router = require('express-promise-router');
 const { createValidator } = require('express-joi-validation');
-const applyUserRoutes = require('./user');
+const user = require('./user');
+const tripsit = require('./tripsit');
 
 module.exports = function createRoutes(baseDeps) {
   const deps = {
@@ -13,8 +14,9 @@ module.exports = function createRoutes(baseDeps) {
 
   const router = Router();
   router.use(express.json());
-  [applyUserRoutes].forEach(applyRoutes => {
-    applyRoutes(router, deps);
-  });
+
+  user(router, deps);
+  tripsit(router, deps);
+
   return router;
 };
