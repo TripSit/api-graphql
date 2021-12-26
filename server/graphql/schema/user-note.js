@@ -1,6 +1,6 @@
 'use strict';
 
-const { gql } = require('apollo-server');
+const { gql } = require('apollo-server-core');
 
 exports.typeDefs = gql`
   extend type Mutation {
@@ -21,8 +21,8 @@ exports.typeDefs = gql`
     user: User!
     type: UserNoteType!
     text: String
-    reportedBy: User!
     expiresAt: DateTime
+    createdBy: User!
     createdAt: DateTime!
   }
 
@@ -62,7 +62,7 @@ exports.resolvers = {
         .first();
     },
 
-    async reportedBy(note, params, { dataSources }) {
+    async createdBy(note, params, { dataSources }) {
       return dataSources.db.knex('users')
         .where('id', note.createdBy)
         .first();

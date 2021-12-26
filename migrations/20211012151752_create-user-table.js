@@ -46,6 +46,11 @@ exports.up = async function up(knex) {
         .defaultTo(false);
 
       table
+        .uuid('createdBy')
+        .references('id')
+        .inTable('users');
+
+      table
         .timestamp('createdAt')
         .notNullable()
         .defaultTo(knex.fn.now());
@@ -95,11 +100,17 @@ exports.up = async function up(knex) {
         .notNullable()
         .defaultTo(knex.fn.now());
     })
-    .createTable('discordUsers', table => {
+    .createTable('discordAccounts', table => {
       table
         .specificType('id', 'CHAR(18)')
         .notNullable()
         .primary();
+
+      table
+        .uuid('userId')
+        .notNullable()
+        .references('id')
+        .inTable('users');
 
       table
         .uuid('createdBy')
@@ -146,9 +157,10 @@ exports.up = async function up(knex) {
 exports.down = async function down(knex) {
   await knex.schema
     .dropTableIfExists('alerts')
-    .dropTableIfExists('discordUsers')
+    .dropTableIfExists('discordAccounts')
     .dropTableIfExists('userNotes')
     .dropTableIfExists('users');
+  await knex.raw('DROP TYPE IF EXISTS "alert_type"');
   await knex.raw('DROP TYPE IF EXISTS "user_access_level"');
   await knex.raw('DROP TYPE IF EXISTS "user_note_type"');
   await knex.raw('DROP EXTENSION IF EXISTS "uuid-ossp"');
