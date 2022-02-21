@@ -10,7 +10,7 @@ exports.HTTP_PORT = parseInt(process.env.HTTP_PORT, 10);
 exports.LOG_PATH = path.resolve(process.env.LOG_PATH);
 
 exports.SESSION_SECRET = process.env.SESSION_SECRET;
-exports.SESSION_MAX_AGE = process.env.SESSION_MAX_AGE;
+exports.SESSION_MAX_AGE = parseInt(process.env.SESSION_MAX_AGE, 10);
 exports.SESSION_SECURE = process.env.SESSION_SECURE === 'true';
 
 exports.POSTGRES_HOST = process.env.POSTGRES_HOST;

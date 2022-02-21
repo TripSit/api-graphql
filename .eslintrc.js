@@ -24,5 +24,11 @@ module.exports = {
         jest: true,
       },
     },
+    {
+      files: ['./server/graphql/data-sources/database/*.js'],
+      rules: {
+        'no-param-reassign': 0,
+      },
+    },
   ],
 };

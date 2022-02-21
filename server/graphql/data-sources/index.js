@@ -2,11 +2,10 @@
 
 const Database = require('./database');
 const Discord = require('./discord');
-const knexConfig = require('../../../knexfile');
 
-module.exports = function createDataSources() {
+module.exports = function createDataSources({ knex }) {
   return {
-    db: new Database(knexConfig),
+    db: new Database(knex),
     discord: new Discord(),
   };
 };

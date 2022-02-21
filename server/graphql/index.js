@@ -26,6 +26,9 @@ module.exports = async function createServer(app, deps) {
         session: req.session,
       };
     },
+    formatError(error) {
+      return NODE_ENV === 'production' ? new Error('Internal server error.') : error;
+    },
   });
 
   await apolloServer.start();
