@@ -20,9 +20,10 @@ module.exports = async function createServer(app, deps) {
       ApolloServerPluginDrainHttpServer({ httpServer }),
       responseCachePlugin(),
     ],
-    context() {
+    context({ req }) {
       return {
         logger,
+        session: req.session,
       };
     },
   });

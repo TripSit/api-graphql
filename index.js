@@ -7,10 +7,15 @@ const createLogger = require('./logger');
 
 const logger = createLogger();
 
-createServer({
-  logger,
-  knex: Knex(knexConfig),
-})
+let knex;
+try {
+  knex = Knex(knexConfig);
+} catch (ex) {
+  console.error('Unable to connect to database.', ex);
+  process.exit(1);
+}
+
+createServer({ logger, knex })
   .then(() => {
     logger.info('TripSit API running...');
   });

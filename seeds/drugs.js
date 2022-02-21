@@ -116,9 +116,9 @@ exports.seed = async function seed(knex) {
 
   const drugRecords = await knex('drugs')
     .insert(drugs.map(drug => ({
-      summary: drug.summary,
-      psychonautwikiSlug: drug.url && new URL(drug.url).pathname.substring(6),
-      errowidExperiencesUrl: drug.experiencesUrl,
+      summary: drug.summary.trim() || null,
+      psychonautwikiSlug: drug.url.trim() || null,
+      errowidExperiencesUrl: drug.experiencesUrl.trim() || null,
     })))
     .returning(['id'])
     .then(records => records.map(({ id }, i) => ({
@@ -129,12 +129,12 @@ exports.seed = async function seed(knex) {
   await knex('drugNames').insert(drugRecords.flatMap(drug => drug.aliases
     .map(alias => ({
       drugId: drug.id,
-      name: alias,
+      name: alias.trim(),
       primary: false,
     }))
     .concat({
       drugId: drug.id,
-      name: drug.name,
+      name: drug.name.trim(),
       primary: true,
     })));
 
@@ -148,11 +148,11 @@ exports.seed = async function seed(knex) {
   return knex('drugRoas').insert(drugRecords.flatMap(drug => drug.roas
     .map(({ name, ...roa }) => ({
       ...roa,
-      route: name.toLowerCase().replace(/:$/, ''),
+      route: name.toLowerCase().replace(/:$/, '').trim(),
     }))
     .map(roa => ({
       drugVariantId: variantRecords.find(variant => variant.drugId === drug.id).id,
-      route: (routeMap[roa.route] || roa.route).toUpperCase(),
+      route: (routeMap[roa.route] || roa.route).trim().toUpperCase(),
 
       doseThreshold: parseDose('threshold', roa.dosage),
       doseLight: parseDose('light', roa.dosage),

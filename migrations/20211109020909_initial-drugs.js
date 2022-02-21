@@ -10,8 +10,9 @@ exports.up = async function up(knex) {
         .primary();
 
       table.text('summary');
-      table.text('psychonautwikiSlug');
-      table.text('erowidExperiencesUrl');
+      table.text('psychonautwikiUrl');
+      table.text('errowidExperiencesUrl');
+      table.timestamp('updatedAt');
 
       table
         .timestamp('createdAt')

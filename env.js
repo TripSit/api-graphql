@@ -17,3 +17,4 @@ exports.POSTGRES_HOST = process.env.POSTGRES_HOST;
 exports.POSTGRES_PORT = parseInt(process.env.POSTGRES_PORT, 10);
 exports.POSTGRES_USER = process.env.POSTGRES_USER;
 exports.POSTGRES_PASSWORD = process.env.POSTGRES_PASSWORD;
+exports.POSTGRES_DATABASE = process.env.POSTGRES_DATABASE;

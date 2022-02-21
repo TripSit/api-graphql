@@ -6,6 +6,7 @@ const {
   POSTGRES_PORT,
   POSTGRES_USER,
   POSTGRES_PASSWORD,
+  POSTGRES_DATABASE,
 } = require('./env');
 
 module.exports = knexStringcase({
@@ -15,5 +16,6 @@ module.exports = knexStringcase({
     port: POSTGRES_PORT,
     user: POSTGRES_USER,
     password: POSTGRES_PASSWORD,
+    database: POSTGRES_DATABASE,
   },
 });
