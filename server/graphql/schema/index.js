@@ -36,18 +36,7 @@ module.exports = function createSchema() {
   ]
     .reduce((acc, schema) => ({
       typeDefs: acc.typeDefs.concat(schema.typeDefs),
-      resolvers: {
-        ...acc.resolvers,
-        ...schema.resolvers,
-        Query: {
-          ...acc.resolvers.Query,
-          ...schema.resolvers.Query,
-        },
-        Mutation: {
-          ...acc.resolvers.Mutation,
-          ...schema.resolvers.Mutation,
-        },
-      },
+      resolvers: acc.resolvers.concat(schema.resolvers),
     }), {
       typeDefs: [baseTypeDefs],
       resolvers: [],
